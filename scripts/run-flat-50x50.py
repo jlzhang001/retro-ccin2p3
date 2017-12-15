@@ -2,34 +2,34 @@
 #===============================================================================
 # Grid Engine steering options
 #===============================================================================
-## Submit job under TREND group
+# Submit job under TREND group
 #$ -P P_trend
 
-## Merge the stdout et stderr in a single file
+# Merge the stdout et stderr in a single file
 #$ -j y
 
-## Files .e et .o copied to current working directory
+# Files .e et .o copied to current working directory
 #$ -cwd
 
-## Notify stop and kill signals before issuing them.
+# Notify stop and kill signals before issuing them.
 #$ -notify
 
-## Job array indices
+# Job array indices
 #$ -t 1-14
 
-## CPU time
+# CPU time
 #$ -l ct=05:00:00
 
-## Memory
+# Memory
 #$ -l vmem=3.0G
 
-## Disk space
+# Disk space
 #$ -l fsize=1.0G
 
-## Request CentOS7
+# Request CentOS7
 #$ -l os=cl7
 
-## Request access to sps
+# Request access to sps
 #$ -l sps=1
 #===============================================================================
 """Generate tau decays for flat array of 100x100 km2
@@ -61,22 +61,20 @@ print "  --> Done in {:.1f} s".format(time.time() - t0)
 # Generate the configuration card
 s = ARRAY_SIZE / 2 + 50E+03
 options = {
-	"generator" : {
-                "theta" : [85.0, 95.0],
-                "energy" : [10**7.5, 10**11.5],
-                "position" : [
-                        [-s, s], [-s, s], [0, 1E+03] ]},
+    "generator": {
+        "theta": [85.0, 95.0],
+        "energy": [10**7.5, 10**11.5],
+        "position": [[-s, s], [-s, s], [0, 1E+03]]},
 
-        "topography" : {
-                "latitude" : 43,
-                "longitude" : 87,
-                "path" : "flat/4" },
+    "topography": {
+        "latitude": 43,
+        "longitude": 87,
+        "path": "flat/4"},
 
-        "primary" : {
-                "events" : 10000,
-                "requested" : 100,
-                "longitudinal" : False },
-}
+    "primary": {
+        "events": 10000,
+        "requested": 100,
+        "longitudinal": False}}
 
 
 # Generate the antenna setup
@@ -87,11 +85,11 @@ dc = 500.
 n = int(ARRAY_SIZE / dc) + 1
 positions = []
 for i in xrange(n):
-	yi = -0.5 * ARRAY_SIZE + i * dc 
-	for j in xrange(n):
-		xj = -0.5 * ARRAY_SIZE + j * dc
-		zij = topo.ground_altitude(xj, yi) + ANTENNA_HEIGHT
-		positions.append((xj, yi, zij))
+    yi = -0.5 * ARRAY_SIZE + i * dc
+    for j in xrange(n):
+        xj = -0.5 * ARRAY_SIZE + j * dc
+        zij = topo.ground_altitude(xj, yi) + ANTENNA_HEIGHT
+        positions.append((xj, yi, zij))
 
 
 # Run RETRO
