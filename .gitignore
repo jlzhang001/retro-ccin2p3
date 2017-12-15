@@ -4,3 +4,6 @@
 
 # Ignore event files
 share/events
+
+# Ignore figures
+*.png
