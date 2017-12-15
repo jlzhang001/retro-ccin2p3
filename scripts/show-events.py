@@ -14,7 +14,8 @@ DATA_DIR = "share/events"
 # Load and parse the events
 topo = Topography(43, 87, "flat/4")
 theta, phi, altitude = [], [], []
-position = []
+position, weight = [], []
+generated = 0
 for name in os.listdir(DATA_DIR):
     if not name.startswith("events"):
         continue
@@ -23,21 +24,27 @@ for name in os.listdir(DATA_DIR):
         _, r, u = event["tau_at_decay"]
         t, p = topo.local_to_angular(r, u)
         _, _, a = topo.local_to_lla(r)
+        w = sum(v[0] for v in event["primaries"][0]) / event["primaries"][1]
+        w *= event["statistics"][0]
+        generated += event["statistics"][1]
         theta.append(t)
         phi.append(p)
         altitude.append(a * 1E-03)
         position.append(r)
+        weight.append(w)
 position = numpy.array(position) * 1E-03
+weight = numpy.array(weight)
 
 
 def plot_histogram(samples):
     """Plot a 1D histogram of sampled values
     """
-    n, x = numpy.histogram(samples, 40)
+    n, x = numpy.histogram(samples, 40, weights=weight / generated)
+    n2, _ = numpy.histogram(samples, x, weights=weight**2 / generated)
     x = 0.5 * (x[1:] + x[:-1])
-    norm = 1. / numpy.trapz(n, x)
+    norm = generated / (sum(weight) * (x[1] - x[0]))
     p = n * norm
-    dp = numpy.sqrt(n) * norm
+    dp = numpy.sqrt((n2 - n * n) / generated) * norm
     plt.figure()
     plt.errorbar(x, p, xerr=x[1] - x[0], yerr=dp, fmt="ko")
 
@@ -50,7 +57,7 @@ plt.xlabel(r"$\theta$ (deg)")
 plt.ylabel(r"pdf (deg$^{-1}$)")
 
 plot_histogram(phi)
-plt.axis((-200., 200., 0., 4E-03))
+plt.axis((-200., 200., 0., 6E-03))
 plt.xlabel(r"$\phi$ (deg)")
 plt.ylabel(r"pdf (deg$^{-1}$)")
 
