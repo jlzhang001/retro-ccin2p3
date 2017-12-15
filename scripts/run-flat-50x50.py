@@ -15,7 +15,7 @@
 #$ -notify
 
 ## Job array indices
-#$ -t 1-4
+#$ -t 1-14
 
 ## CPU time
 #$ -l ct=05:00:00
@@ -47,7 +47,7 @@ import ccin2p3
 ARRAY_SIZE = 100E+03
 ANTENNA_HEIGHT = 3.
 RETRO_HASHTAG = "898d13c"
-N_EVENTS = 5000
+N_EVENTS = 1000
 OUTDIR = "/sps/hep/trend/niess/retro"
 
 
