@@ -15,10 +15,10 @@
 #$ -notify
 
 # Job array indices
-#$ -t 1-14
+#$ -t 1-20
 
 # CPU time
-#$ -l ct=05:00:00
+#$ -l ct=12:00:00
 
 # Memory
 #$ -l vmem=3.0G
@@ -59,17 +59,17 @@ print "  --> Done in {:.1f} s".format(time.time() - t0)
 
 
 # Generate the configuration card
-s = ARRAY_SIZE / 2 + 50E+03
+s = ARRAY_SIZE / 2 + 250E+03
 options = {
     "generator": {
-        "theta": [85.0, 95.0],
+        "theta": [90.0, 92.5],
         "energy": [10**7.5, 10**11.5],
-        "position": [[-s, s], [-s, s], [0, 1E+03]]},
+        "position": [[-s, s], [-s, s], [0, 3E+03]]},
 
     "topography": {
         "latitude": 43,
         "longitude": 87,
-        "path": "flat/4"},
+        "path": "flat/10"},
 
     "primary": {
         "events": 10000,

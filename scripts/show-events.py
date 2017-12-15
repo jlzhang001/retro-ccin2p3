@@ -95,7 +95,7 @@ plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-azimuth.png")
 
 plot_histogram(altitude)
-plt.axis((0., 1., 0., 0.35))
+plt.axis((0., 3., 0., 0.35))
 plt.xlabel(r"decay altitude, h$_\tau$ (km)")
 plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-altitude.png")
