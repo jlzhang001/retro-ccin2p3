@@ -46,7 +46,7 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 100E+03
 ANTENNA_HEIGHT = 3.
-RETRO_HASHTAG = "898d13c"
+RETRO_HASHTAG = "e612d5b"
 N_EVENTS = 1000
 OUTDIR = "/sps/hep/trend/niess/retro"
 
@@ -63,7 +63,7 @@ s = ARRAY_SIZE / 2 + 250E+03
 options = {
     "generator": {
         "theta": [90.0, 92.5],
-        "energy": [10**7.5, 10**11.5],
+        "energy": [10**7.5, 10**10.5],
         "position": [[-s, s], [-s, s], [0, 3E+03]]},
 
     "topography": {
