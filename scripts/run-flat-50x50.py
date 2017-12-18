@@ -18,7 +18,7 @@
 #$ -t 1-20
 
 # CPU time
-#$ -l ct=12:00:00
+#$ -l ct=24:00:00
 
 # Memory
 #$ -l vmem=3.0G
@@ -46,7 +46,7 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 100E+03
 ANTENNA_HEIGHT = 3.
-RETRO_HASHTAG = "c991b5e"
+RETRO_HASHTAG = "fb4e031"
 N_EVENTS = 1000
 OUTDIR = "/sps/hep/trend/niess/retro"
 
@@ -59,17 +59,20 @@ print "  --> Done in {:.1f} s".format(time.time() - t0)
 
 
 # Generate the configuration card
-s = ARRAY_SIZE / 2 + 250E+03
+s = ARRAY_SIZE / 2 + 300E+03
 options = {
     "generator": {
         "theta": [90.0, 92.5],
-        "energy": ["1 / E**2", [10**7.5, 10**10.5]],
-        "position": [[-s, s], [-s, s], [0, 3E+03]]},
+        "energy": [10**7.5, 10**10.5],
+        "position": [[-s, s], [-s, s], [0, 5E+03]]},
 
     "topography": {
         "latitude": 43,
         "longitude": 87,
         "path": "flat/10"},
+
+    "selector" : {
+        "vertex": { "limit": 3.0 }},
 
     "primary": {
         "events": 10000,
