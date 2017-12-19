@@ -52,10 +52,11 @@ def load(path):
 
 theta, phi, altitude, position, energy, weight, generated = load(DATA_DIR)
 
-def plot_histogram(samples, weight, generated, log=False, clr="k", new=True):
+def plot_histogram(samples, weight, generated, plot=plt.plot, clr="k",
+                   new=True, factor=None):
     """Plot a 1D histogram of sampled values
     """
-    if log:
+    if plot == plt.loglog:
         n, b = numpy.histogram(numpy.log(samples), 40,
                                weights=weight / generated)
         n2, _ = numpy.histogram(numpy.log(samples), b,
@@ -75,19 +76,22 @@ def plot_histogram(samples, weight, generated, log=False, clr="k", new=True):
     dp = numpy.sqrt((n2 - n * n) / generated) * norm
     if new:
         plt.figure()
-    if log:
-        plt.loglog(x, p * x, clr + "o")
-        plt.errorbar(x, p * x, xerr=xerr, yerr=dp * x, fmt=clr + "o")
+    if factor is None:
+        y = p
+        yerr = dp
     else:
-        plt.plot(x, p, clr + "o")
-        plt.errorbar(x, p, xerr=xerr, yerr=dp, fmt=clr + "o")
+        factor = x**factor
+        y = p * factor
+        yerr = dp * factor
+    plot(x, y, clr + "o")
+    plt.errorbar(x, y, xerr=xerr, yerr=yerr, fmt=clr + "o")
     return x, p
 
 
 # Show the distributions
 plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
-x, p = plot_histogram(energy, weight, generated, log=True)
+x, p = plot_histogram(energy, weight, generated, plot=plt.loglog, factor=1)
 plt.xlabel(r"energy, E$_\tau$ (GeV)")
 plt.ylabel(r"E$_\tau \times$ rate (a$^{-1}$)")
 plt.savefig("tau-energy.png")
@@ -104,21 +108,22 @@ plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-zenith.png")
 
 plot_histogram(phi, weight, generated)
-plt.axis((-200., 200., 0., 8E-04))
+plt.axis((-200., 200., 0., 2E-02))
 plt.xticks(numpy.linspace(-180., 180., 5))
-plt.yticks(numpy.linspace(0., 8E-04, 5))
+plt.yticks(numpy.linspace(0., 2E-02, 5))
 plt.xlabel(r"azimuth, $\phi_\tau$ (deg)")
 plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-azimuth.png")
 
-plot_histogram(altitude, weight, generated)
-plt.axis((0., 3., 0., 0.35))
+plot_histogram(altitude, weight, generated, plot=plt.semilogy)
+plt.axis((0., 5., 1E-04, 1E+02))
 plt.xlabel(r"decay altitude, h$_\tau$ (km)")
 plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-altitude.png")
 
 plt.figure()
 plt.plot(position[:, 0], position[:, 1], "k.")
+plt.plot((-50., -50., 50., 50., -50.), (-50., 50., 50., -50., -50.), "w--")
 plt.xlabel(r"local x (km)")
 plt.ylabel(r"local y (km)")
 plt.savefig("tau-xy.png")
