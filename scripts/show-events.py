@@ -34,6 +34,7 @@ def load(path):
             K = [numpy.linalg.norm(v[3]) > 6371E+03
                  for v in event["primaries"][0]]
             J = [not k for k in K]
+            K, J = map(lambda X: numpy.nonzero(X)[0], (K, J))
             wp = numpy.array([v[0] for v in event["primaries"][0]])
             norm = event["statistics"][0] * PHI0 * year / event["primaries"][1]
             wE = sum(wp[J]) * norm
@@ -60,6 +61,10 @@ def load(path):
     print "Atmospheric    = {:.3f} +-{:.3f} a^-1".format(mA, sA)
     print "Events ratio   = {:.2f}".format(
         sum(weight[:,0] > 0.) / float(len(weight)))
+
+    if mE <= 0.:
+        # Bring the atmospheric events to the front
+        weight[:,[0, 1]] = weight[:,[1, 0]]
 
     return theta, phi, altitude, position, energy, weight, generated
 
@@ -96,25 +101,28 @@ def plot_histogram(samples, weight, generated, plot=plt.plot, clr="k",
         factor = x**factor
         y = p * factor
         yerr = dp * factor
-    plot(x, y, clr + "o")
-    plt.errorbar(x, y, xerr=xerr, yerr=yerr, fmt=clr + "o")
+    if sum(y) > 0:
+        plot(x, y, clr + "o")
+        plt.errorbar(x, y, xerr=xerr, yerr=yerr, fmt=clr + "o")
     return x, p
 
 
 # Show the distributions
 plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
-x, p = plot_histogram(energy, weight[:, 0], generated, plot=plt.loglog,
-                      factor=1)
+x, p = plot_histogram(energy, weight[:, 0], generated, plot=plt.loglog)
 x2, p2 = plot_histogram(energy, weight[:, 1], generated, plot=plt.loglog,
-                        factor=1, new=False, clr="r")
+                        new=False, clr="r")
+earthskimming = sum(p2) > 0.
+
 plt.xlabel(r"energy, E$_\tau$ (GeV)")
 plt.ylabel(r"E$_\tau \times$ rate (a$^{-1}$)")
 plt.savefig("tau-energy.png")
 
 plt.figure()
 plt.semilogx(x, cumtrapz(p, x, initial=0.) / numpy.trapz(p, x), "k-")
-plt.semilogx(x2, cumtrapz(p2, x2, initial=0.) / numpy.trapz(p2, x2), "r-")
+if earthskimming:
+    plt.semilogx(x2, cumtrapz(p2, x2, initial=0.) / numpy.trapz(p2, x2), "r-")
 plt.xlabel(r"energy limit, E$_\tau$ (GeV)")
 plt.ylabel(r"ratio")
 plt.savefig("tau-ratio.png")
@@ -125,9 +133,14 @@ plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-zenith.png")
 
 plot_histogram(phi, weight[:, 0], generated)
-plt.axis((-200., 200., 0., 2E-02))
 plt.xticks(numpy.linspace(-180., 180., 5))
-plt.yticks(numpy.linspace(0., 2E-02, 5))
+if earthskimming:
+    plt.axis((-200., 200., 0., 2E-02))
+    plt.yticks(numpy.linspace(0., 2E-02, 5))
+else:
+    plt.axis((-200., 200., 0., 4E-03))
+    plt.yticks(numpy.linspace(0., 4E-03, 5))
+
 plt.xlabel(r"azimuth, $\phi_\tau$ (deg)")
 plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-azimuth.png")
@@ -135,7 +148,10 @@ plt.savefig("tau-azimuth.png")
 plot_histogram(altitude, weight[:, 0], generated, plot=plt.semilogy)
 plot_histogram(altitude, weight[:, 1], generated, plot=plt.semilogy, new=False,
                clr="r")
-plt.axis((0., 3., 1E-03, 1E+02))
+if earthskimming:
+    plt.axis((0., 3., 1E-03, 1E+02))
+else:
+    plt.axis((0., 10., 1E-03, 1E+00))
 plt.xlabel(r"decay altitude, h$_\tau$ (km)")
 plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-altitude.png")
