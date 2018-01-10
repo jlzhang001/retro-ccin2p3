@@ -46,7 +46,7 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 100E+03
 ANTENNA_HEIGHT = 3.
-RETRO_HASHTAG = "fb4e031"
+RETRO_HASHTAG = "016ff06"
 N_EVENTS = 1000
 OUTDIR = "/sps/hep/trend/niess/retro"
 

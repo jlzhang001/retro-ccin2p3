@@ -1,0 +1,13 @@
+{
+        "topography" : {
+                "latitude" : 43,
+                "longitude" : 87,
+                "path" : "flat/10",
+                "size" : 300E+03,
+                "resolution" : 201,
+                "texture" : "grass" },
+
+        "events": {
+                "path" : "share/events/E.1e17_X.93815_Y.74409_Z.-559_T.91_P.21_D.3750214666968983.json",
+                "on_start" : [ "toggle_all_decays" ] }
+}
