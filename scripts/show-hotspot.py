@@ -5,68 +5,26 @@ import sys
 exclude = "/usr/local/python/python-2.7/lib/python2.7/site-packages"
 sys.path = [v for v in sys.path if not (exclude in v)]
 
-import os
+import cPickle as pickle
+
 import numpy
 from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
-from retro.event import EventIterator
 
+# Load the reduced events
+with open("share/events.p", "rb") as f:
+    n, data = pickle.load(f)
+data = numpy.array(data)
 
-# Settings
-DATA_DIR = "share/events"
-
-
-def primary_flux(e):
-    # Waxman-Bahcall bound with 1 / 3 of tau neutrinos
-    return 2E-04 / (3. * e**2)
-
-
-# Load and parse the events
-year = 365.25 * 24. * 60. * 60.
-
-def add_events(path, energy, position, theta, phi, altitude, weight):
-    """Load events from a file and append them
-    """
-    generated = 0
-    for event in EventIterator(path):
-        _, e, r, u, (_, _, a), (t, p) = event["tau_at_decay"]
-        w = numpy.array([v[0] * primary_flux(v[1])
-                         for v in event["primaries"]])
-        norm = year / event["statistics"][1]
-        w = sum(w) * norm
-        generated += event["statistics"][0]
-        if w == 0:
-            continue
-        theta.append(t)
-        phi.append(p)
-        altitude.append(a * 1E-03)
-        position.append(r)
-        energy.append(e)
-        weight.append(w)
-    return generated
-
-# Merge a set of decay files
-theta, phi, altitude = [], [], []
-position, energy, weight = [], [], []
-generated = 0
-for name in os.listdir(DATA_DIR):
-    if not name.startswith("events"):
-        continue
-    filename = os.path.join(DATA_DIR, name)
-    generated += add_events(filename, energy, position, theta, phi, altitude,
-                            weight)
-
-position = numpy.array(position) * 1E-03
-weight = numpy.array(weight)
-mu = sum(weight) / generated
-sigma = sum(weight**2) / generated
-sigma = numpy.sqrt((sigma - mu**2) / generated)
+# Print the total rate
+mu = sum(data[:,0]) / n
+sigma = sum(data[:,0]**2) / n
+sigma = numpy.sqrt((sigma - mu**2) / n)
 print "Rate = {:.3f} +-{:.3f} a^-1".format(mu, sigma)
 
 def plot_histogram(samples, weight, generated, plot=plt.plot, clr="k",
                    new=True, factor=None):
-    """Plot a 1D histogram of sampled values
-    """
+    """Plot a 1D histogram of sampled values"""
     if plot == plt.loglog:
         n, b = numpy.histogram(numpy.log(samples), 40,
                                weights=weight / generated)
@@ -103,8 +61,7 @@ def plot_histogram(samples, weight, generated, plot=plt.plot, clr="k",
 # Show the distributions
 plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
-x, p = plot_histogram(energy, weight, generated, plot=plt.loglog)
-
+x, p = plot_histogram(data[:, 1], data[:, 0], n, plot=plt.loglog)
 plt.xlabel(r"energy, E$_\tau$ (GeV)")
 plt.ylabel(r"E$_\tau \times$ rate (a$^{-1}$)")
 plt.savefig("tau-energy.png")
@@ -115,28 +72,28 @@ plt.xlabel(r"energy limit, E$_\tau$ (GeV)")
 plt.ylabel(r"ratio")
 plt.savefig("tau-ratio.png")
 
-plot_histogram(theta, weight, generated)
+plot_histogram(data[:, 8], data[:, 0], n)
+plt.axis((85., 95., 0., 3.))
 plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
 plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-zenith.png")
 
-plot_histogram(phi, weight, generated)
+plot_histogram(data[:, 9], data[:, 0], n)
 plt.xticks(numpy.linspace(-180., 180., 5))
-plt.axis((-200., 200., 0., 4E-03))
-plt.yticks(numpy.linspace(0., 4E-03, 5))
-
+plt.axis((-200., 200., 0., 2E-02))
+plt.yticks(numpy.linspace(0., 2E-02, 5))
 plt.xlabel(r"azimuth, $\phi_\tau$ (deg)")
 plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-azimuth.png")
 
-plot_histogram(altitude, weight, generated, plot=plt.semilogy)
-plt.axis((0., 10., 1E-03, 1E+00))
+plot_histogram(data[:, 7] * 1E-03, data[:, 0], n, plot=plt.semilogy)
+plt.axis((0., 5., 1E-02, 1E+01))
 plt.xlabel(r"decay altitude, h$_\tau$ (km)")
 plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-altitude.png")
 
 plt.figure()
-plt.plot(position[:, 0], position[:, 1], "k.")
+plt.plot(data[:, 2] * 1E-03, data[:, 3] * 1E-03, "k.")
 dx, dy = 0.5 * 150.4, 0.5 * 66.5
 plt.plot((-dx, -dx, dx, dx, -dx), (-dy, dy, dy, -dy, -dy), "w--")
 plt.xlabel(r"local x (km)")
