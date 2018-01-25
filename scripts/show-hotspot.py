@@ -1,62 +1,67 @@
 #!/usr/bin/env python
 
-# Prune site packages at CC
+# Prune obsolete site packages at CC
 import sys
-sys.path = [v for v in sys.path if not ("/usr/local/python/python-2.7/lib/python2.7/site-packages" in v)]
+exclude = "/usr/local/python/python-2.7/lib/python2.7/site-packages"
+sys.path = [v for v in sys.path if not (exclude in v)]
 
 import os
 import numpy
 from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
 from retro.event import EventIterator
-from grand_tour import Topography
 
 
 # Settings
 DATA_DIR = "share/events"
-PHI0 = 2. / 3. * 1E-04
+
+
+def primary_flux(e):
+    # Waxman-Bahcall bound with 1 / 3 of tau neutrinos
+    return 2E-04 / (3. * e**2)
 
 
 # Load and parse the events
 year = 365.25 * 24. * 60. * 60.
-topo = Topography(42.1, 86.3, "share/topography")
 
-def load(path):
-    """Load and parse a set of decay files
+def add_events(path, energy, position, theta, phi, altitude, weight):
+    """Load events from a file and append them
     """
-    theta, phi, altitude = [], [], []
-    position, energy, weight = [], [], []
     generated = 0
-    for name in os.listdir(path):
-        if not name.startswith("events"):
+    for event in EventIterator(path):
+        _, e, r, u, (_, _, a), (t, p) = event["tau_at_decay"]
+        w = numpy.array([v[0] * primary_flux(v[1])
+                         for v in event["primaries"]])
+        norm = year / event["statistics"][1]
+        w = sum(w) * norm
+        generated += event["statistics"][0]
+        if w == 0:
             continue
-        filename = os.path.join(path, name)
-        for event in EventIterator(filename):
-            _, e, r, u, _, _ = event["tau_at_decay"]
-            t, p = topo.local_to_angular(r, u)
-            _, _, a = topo.local_to_lla(r)
-            w = numpy.array([v[0] / v[1]**2 for v in event["primaries"]])
-            norm = PHI0 * year / event["statistics"][1]
-            w = sum(w) * norm
-            generated += event["statistics"][0]
-            if w == 0:
-                continue
-            theta.append(t)
-            phi.append(p)
-            altitude.append(a * 1E-03)
-            position.append(r)
-            energy.append(e)
-            weight.append(w)
-    position = numpy.array(position) * 1E-03
-    weight = numpy.array(weight)
-    mu = sum(weight) / generated
-    sigma = sum(weight**2) / generated
-    sigma = numpy.sqrt((sigma - mu**2) / generated)
-    print "Rate = {:.3f} +-{:.3f} a^-1".format(mu, sigma)
+        theta.append(t)
+        phi.append(p)
+        altitude.append(a * 1E-03)
+        position.append(r)
+        energy.append(e)
+        weight.append(w)
+    return generated
 
-    return theta, phi, altitude, position, energy, weight, generated
+# Merge a set of decay files
+theta, phi, altitude = [], [], []
+position, energy, weight = [], [], []
+generated = 0
+for name in os.listdir(DATA_DIR):
+    if not name.startswith("events"):
+        continue
+    filename = os.path.join(DATA_DIR, name)
+    generated += add_events(filename, energy, position, theta, phi, altitude,
+                            weight)
 
-theta, phi, altitude, position, energy, weight, generated = load(DATA_DIR)
+position = numpy.array(position) * 1E-03
+weight = numpy.array(weight)
+mu = sum(weight) / generated
+sigma = sum(weight**2) / generated
+sigma = numpy.sqrt((sigma - mu**2) / generated)
+print "Rate = {:.3f} +-{:.3f} a^-1".format(mu, sigma)
 
 def plot_histogram(samples, weight, generated, plot=plt.plot, clr="k",
                    new=True, factor=None):
@@ -132,7 +137,8 @@ plt.savefig("tau-altitude.png")
 
 plt.figure()
 plt.plot(position[:, 0], position[:, 1], "k.")
-plt.plot((-50., -50., 50., 50., -50.), (-50., 50., 50., -50., -50.), "w--")
+dx, dy = 0.5 * 150.4, 0.5 * 66.5
+plt.plot((-dx, -dx, dx, dx, -dx), (-dy, dy, dy, -dy, -dy), "w--")
 plt.xlabel(r"local x (km)")
 plt.ylabel(r"local y (km)")
 plt.savefig("tau-xy.png")

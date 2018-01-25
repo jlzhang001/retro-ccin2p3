@@ -54,14 +54,14 @@ topography = {
     "latitude" : 42.1,
     "longitude" : 86.3,
     "path" : "topography",
-    "stack_size" : 122 }
+    "stack_size" : 144 }
 
 
 # Install RETRO
 print "# Installing RETRO ..."
 t0 = time.time()
 rootdir, tmpdir, tag = ccin2p3.retro_install(hashtag=RETRO_HASHTAG,
-                                             topography=topography)
+                                             topography=(topography, 5, 6))
 print "  --> Done in {:.1f} s".format(time.time() - t0)
 
 
