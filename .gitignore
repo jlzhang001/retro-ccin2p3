@@ -2,8 +2,9 @@
 *.pyc
 *.pyo
 
-# Ignore event files
-share/events
+# Ignore event files and topography
+share/events*
+share/topography
 
 # Ignore figures
 *.png
