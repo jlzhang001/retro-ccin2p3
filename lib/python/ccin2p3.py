@@ -70,7 +70,7 @@ def retro_install(path=None, topography=None, hashtag=None):
                 if lng >= 0: ew = "E"
                 else: ew = "W"
                 path = os.path.join(TOPO_PATH,
-                    "ASTGTM2_{:}{:02d}{:}{:03d}_num.tif".format(
+                    "ASTGTM2_{:}{:02d}{:}{:03d}_dem.tif".format(
                         sn, lat, ew, lng))
                 shutil.copy(path, topography["path"])
 
