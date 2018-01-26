@@ -38,5 +38,6 @@ plt.pcolor(longitude, latitude, rate, cmap="nipy_spectral", norm=LogNorm(),
 plt.colorbar()
 plt.xlabel(r"longitude (deg)")
 plt.ylabel(r"latitude (deg)")
-plt.title(r"trigger rate (Hz / deg$^2$)")
+plt.title(r"trigger rate (a$^{-1}$ / deg$^2$)")
+plt.savefig("trigger-rate-map.png")
 plt.show()

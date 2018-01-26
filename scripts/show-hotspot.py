@@ -122,7 +122,7 @@ plt.plot((x0, x0, x1, x1, x0), (y0, y1, y1, y0, y0), "w-")
 plt.colorbar()
 plt.xlabel(r"longitude (deg)")
 plt.ylabel(r"latitude (deg)")
-plt.title(r"$\tau$ rate (Hz / deg$^2$)")
+plt.title(r"$\tau$ rate (a$^{-1}$ / deg$^2$)")
 plt.savefig("tau-rate-map.png")
 
 plt.show()

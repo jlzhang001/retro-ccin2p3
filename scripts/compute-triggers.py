@@ -32,12 +32,24 @@ def add_triggers(event, latitude, longitude, rate):
             la.append(lla[0])
             lo.append(lla[1])
         if la:
-            p, _, _ = numpy.histogram2d(lo, la, (longitude, latitude),
-                                        normed=True)
-            if not numpy.isnan(p).any():
-                rate += w * p
+            p, _, _ = numpy.histogram2d(lo, la, (longitude, latitude))
+            rate += w * p
     return n
 
+def antennas_density(latitude, longitude):
+    """Compute the density of antennas"""
+    Dx, Dy, s = 0.5 * 66.5E+03, 0.5 * 150.4E+03, 500.
+    x = numpy.arange(-Dx, Dx + s, s)
+    y = numpy.arange(-Dy, Dy + s, s)
+    la, lo = [], []
+    for i, yi in enumerate(y):
+        for j, xj in enumerate(x):
+            zij = topo.ground_altitude(xj, yi)
+            lla = topo.local_to_lla((xj, yi, zij))
+            la.append(lla[0])
+            lo.append(lla[1])
+    p, _, _ = numpy.histogram2d(lo, la, (longitude, latitude))
+    return p
 
 def process(path, latitude, longitude, rate):
     """Process a set of event files"""
@@ -53,7 +65,8 @@ def process(path, latitude, longitude, rate):
             generated += add_triggers(event, latitude, longitude, rate)
         print "  --> Done in {:.1f} s".format(time.time() - t0)
     if generated > 0:
-        rate /= generated
+        d = antennas_density(latitude, longitude)
+        rate /= (generated * d)
     print rate.max()
     latitude = 0.5 * (latitude[1:] + latitude[:-1])
     longitude = 0.5 * (longitude[1:] + longitude[:-1])
