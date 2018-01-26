@@ -46,7 +46,7 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "796747f"
+RETRO_HASHTAG = "4b9fa52"
 N_EVENTS = 1000
 OUTDIR = "/sps/hep/trend/niess/retro/hotspot"
 

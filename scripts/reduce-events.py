@@ -45,6 +45,8 @@ def process(path, summarise):
     if len(data) == 0:
         raise RuntimeError("No event found")
 
+    while path.endswith("/"):
+        path = path[:-1]
     path += ".p"
     with open(path, "wb+") as f:
         pickle.dump((generated, data), f, -1)

@@ -20,23 +20,23 @@ topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",
 
 # Load the trigger map
 with open("share/events.triggers.p", "rb") as f:
-    n, rate_map = pickle.load(f)
-rate = rate_map[4] / n
-x = numpy.arange(0., rate.shape[1] * rate_map[1], rate_map[1]) + rate_map[0]
-y = numpy.arange(0., rate.shape[0] * rate_map[3], rate_map[3]) + rate_map[2]
+    n, latitude, longitude, rate = pickle.load(f)
 
 # Compute the topography
 h = numpy.zeros(rate.shape)
-for i, yi in enumerate(y):
-    for j, xj in enumerate(x):
-        h[i, j] = topo.ground_altitude(xj, yi)
+for i, la in enumerate(latitude):
+    for j, lo in enumerate(longitude):
+        h[i, j] = topo.ground_altitude(la, lo, geodetic=True)
 
 # Show the map
 plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
 plt.figure()
-# plt.contourf(x * 1E-03, y * 1E-03, h * 1E-03, 100, cmap="terrain")
-# plt.pcolor(x, y, rate, norm=LogNorm())
-plt.pcolor(x * 1E-03, y * 1E-03, h * 1E-03, cmap="terrain")
+plt.contour(longitude, latitude, h, 10, colors="k")
+plt.pcolor(longitude, latitude, rate, cmap="nipy_spectral", norm=LogNorm(),
+           alpha=0.5)
 plt.colorbar()
+plt.xlabel(r"longitude (deg)")
+plt.ylabel(r"latitude (deg)")
+plt.title(r"trigger rate (Hz / deg$^2$)")
 plt.show()

@@ -10,6 +10,10 @@ import cPickle as pickle
 import numpy
 from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+
+from grand_tour import Topography
+
 
 # Load the reduced events
 with open("share/events.p", "rb") as f:
@@ -73,15 +77,15 @@ plt.ylabel(r"ratio")
 plt.savefig("tau-ratio.png")
 
 plot_histogram(data[:, 8], data[:, 0], n)
-plt.axis((85., 95., 0., 3.))
+plt.axis((85., 95., 0., 6.))
 plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
 plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-zenith.png")
 
 plot_histogram(data[:, 9], data[:, 0], n)
 plt.xticks(numpy.linspace(-180., 180., 5))
-plt.axis((-200., 200., 0., 2E-02))
-plt.yticks(numpy.linspace(0., 2E-02, 5))
+plt.axis((-200., 200., 0., 1E-01))
+plt.yticks(numpy.linspace(0., 1E-01, 5))
 plt.xlabel(r"azimuth, $\phi_\tau$ (deg)")
 plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-azimuth.png")
@@ -92,12 +96,33 @@ plt.xlabel(r"decay altitude, h$_\tau$ (km)")
 plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-altitude.png")
 
+# Estimate the decay density
+rate, xe, ye = numpy.histogram2d(data[:, 6], data[:, 5], 100,
+                                 normed=True, weights=data[:, 0])
+rate *= mu
+x = 0.5 * (xe[1:] + xe[:-1])
+y = 0.5 * (ye[1:] + ye[:-1])
+
+# Compute the topography
+topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",
+                  stack_size=49)
+h = numpy.zeros(rate.shape)
+for i, yi in enumerate(y):
+    for j, xj in enumerate(x):
+        h[i, j] = topo.ground_altitude(yi, xj, geodetic=True)
+
 plt.figure()
-plt.plot(data[:, 2] * 1E-03, data[:, 3] * 1E-03, "k.")
-dx, dy = 0.5 * 150.4, 0.5 * 66.5
-plt.plot((-dx, -dx, dx, dx, -dx), (-dy, dy, dy, -dy, -dy), "w--")
-plt.xlabel(r"local x (km)")
-plt.ylabel(r"local y (km)")
-plt.savefig("tau-xy.png")
+plt.contour(x, y, h, 10, colors="k", alpha=0.75)
+plt.pcolor(x, y, rate, cmap="nipy_spectral", norm=LogNorm(), alpha=0.5)
+dx, dy = 0.5 * 66.5E+03, 0.5 * 150.4E+03
+y0, x0, _ = topo.local_to_lla((-dx, -dy, 0.))
+y1, x1, _ = topo.local_to_lla((dx, dy, 0.))
+print x0, y0, x1, y1
+plt.plot((x0, x0, x1, x1, x0), (y0, y1, y1, y0, y0), "w-")
+plt.colorbar()
+plt.xlabel(r"longitude (deg)")
+plt.ylabel(r"latitude (deg)")
+plt.title(r"$\tau$ rate (Hz / deg$^2$)")
+plt.savefig("tau-rate-map.png")
 
 plt.show()
