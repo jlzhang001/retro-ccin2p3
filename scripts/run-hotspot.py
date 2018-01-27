@@ -29,8 +29,8 @@
 # Request CentOS7
 #$ -l os=cl7
 
-# Request access to sps
-#$ -l sps=1
+# Request access to iRODS and /sps
+#$ -l irods=1,sps=1
 #===============================================================================
 """Generate tau decays for the hotspot array of 100x100 km2
 """
@@ -48,7 +48,7 @@ ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
 RETRO_HASHTAG = "379515e"
 N_EVENTS = 1000
-OUTDIR = "/sps/hep/trend/niess/retro/hotspot"
+OUTDIR = "irods://grand/sim/hotspot-150x67km2/seeds"
 
 topography = {
     "latitude" : 42.1,
@@ -112,6 +112,6 @@ print ""
 print "# Running RETRO ..."
 t0 = time.time()
 outfile = "events.{:}.json".format(tag)
-ccin2p3.retro_run(N_EVENTS, options, setup, outfile=os.path.join(
+ccin2p3.retro_run(N_EVENTS, options, setup, path=os.path.join(
     OUTDIR, outfile))
 print "  --> Done in {:.1f} s".format(time.time() - t0)

@@ -15,3 +15,6 @@ export LD_LIBRARY_PATH=$p
 
 # Disable certificate check
 git config --global http.sslverify false
+
+# Use iRODS
+. irods_env.sh

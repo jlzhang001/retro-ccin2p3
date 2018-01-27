@@ -100,6 +100,6 @@ print ""
 print "# Running RETRO ..."
 t0 = time.time()
 outfile = "events.{:}.json".format(tag)
-ccin2p3.retro_run(N_EVENTS, options, positions, outfile=os.path.join(
+ccin2p3.retro_run(N_EVENTS, options, positions, path=os.path.join(
     OUTDIR, outfile))
 print "  --> Done in {:.1f} s".format(time.time() - t0)

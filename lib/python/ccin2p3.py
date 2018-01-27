@@ -86,17 +86,18 @@ def retro_install(path=None, topography=None, hashtag=None):
     return rootdir, path, tag
 
 
-def retro_run(events, options, setup=None, outfile=None):
+def retro_run(events, options, setup=None, path=None):
     """Run RETRO with the given options and antenna positions
     """
 
     # Dump the configuration card
-    if outfile is None:
+    if (path is None) or (path.startswith("irods://")):
         outfile = "events.json"
     else:
-        outdir = os.path.dirname(outfile)
+        outdir = os.path.dirname(path)
         if outdir and not os.path.exists(outdir):
             os.makedirs(outdir)
+        outfile = path
     card = options.copy()
     card["processor"] = {"requested": events}
     card["logger"] = {"path": outfile}
@@ -113,3 +114,8 @@ def retro_run(events, options, setup=None, outfile=None):
 
     # Run RETRO
     system(". retro/setup.sh && ./retro/bin/retro-run card.json")
+
+    # Copy the data if required
+    if path.startswith("irods://"):
+        path = path.split("irods://")[-1]
+        system("iput -f {:} {:}".format(outfile, path))
