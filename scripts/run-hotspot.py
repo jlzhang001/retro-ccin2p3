@@ -48,7 +48,7 @@ ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
 RETRO_HASHTAG = "379515e"
 N_EVENTS = 1000
-OUTDIR = "irods://grand/sim/hotspot-150x67km2/seeds"
+OUTDIR = "irods://grand/test/hotspot-theta1"
 
 topography = {
     "latitude" : 42.1,
@@ -68,15 +68,11 @@ print "  --> Done in {:.1f} s".format(time.time() - t0)
 # Generate the configuration card
 sx, sy = map(lambda x: 0.5 * x + 300E+03, ARRAY_SIZE)
 options = {
-    "generator" :
-                [[ 1.0, {
-                        "theta" : ["uniform", [85.0, 95.0]],
-                        "energy" : [10**7.5, 10**10.5],
-                        "position" : [[-sx, sx],
-                                      [-sy, sy],
-                                      [0, 5E+03] ]}],
-                [ 2.0, {
-                        "theta" : ["linear", [90.0, 95.0]] }]],
+    "generator" : { "theta" : ["uniform", [85.0, 95.0]],
+                    "energy" : [10**7.5, 10**10.5],
+                    "position" : [[-sx, sx],
+                                  [-sy, sy],
+                                  [0, 5E+03]] },
     "topography" : topography,
 
     "selector" : {
@@ -105,7 +101,6 @@ for i in xrange(ny):
                       yi + uij[1] * ANTENNA_HEIGHT,
                       zij + uij[2] * ANTENNA_HEIGHT,
                       alpha, beta))
-
 
 # Run RETRO
 print ""
