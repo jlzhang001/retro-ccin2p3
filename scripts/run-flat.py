@@ -18,21 +18,21 @@
 #$ -t 1-20
 
 # CPU time
-#$ -l ct=24:00:00
+#$ -l ct=12:00:00
 
 # Memory
-#$ -l vmem=3.0G
+#$ -l h_rss=4.0G
 
 # Disk space
-#$ -l fsize=1.0G
+#$ -l h_fsize=16.0G
 
 # Request CentOS7
 #$ -l os=cl7
 
-# Request access to sps
-#$ -l sps=1
+# Request access to iRODS and /sps
+#$ -l irods=1,sps=1
 #===============================================================================
-"""Generate tau decays for flat array of 100x100 km2
+"""Generate tau decays for the flat array of 66x150 km2
 """
 
 import sys
@@ -44,11 +44,16 @@ import time
 import ccin2p3
 
 # Settings
-ARRAY_SIZE = 100E+03
+ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "379515e"
+RETRO_HASHTAG = "e9ec939"
 N_EVENTS = 1000
-OUTDIR = "/sps/hep/trend/niess/retro"
+OUTDIR = "irods://grand/test/flat-sel3"
+
+topography = {
+    "latitude" : 42.1,
+    "longitude" : 86.3,
+    "path" : "flat/12" }
 
 
 # Install RETRO
@@ -59,17 +64,14 @@ print "  --> Done in {:.1f} s".format(time.time() - t0)
 
 
 # Generate the configuration card
-s = ARRAY_SIZE / 2 + 300E+03
+sx, sy = map(lambda x: 0.5 * x + 300E+03, ARRAY_SIZE)
 options = {
-    "generator": {
-        "theta": [90.0, 92.5],
-        "energy": [10**7.5, 10**10.5],
-        "position": [[-s, s], [-s, s], [0, 5E+03]]},
-
-    "topography": {
-        "latitude": 43,
-        "longitude": 87,
-        "path": "flat/10"},
+    "generator" : { "theta" : ["uniform", [85.0, 95.0]],
+                    "energy" : [10**7.5, 10**10.5],
+                    "position" : [[-sx, sx],
+                                  [-sy, sy],
+                                  [0, 5E+03]] },
+    "topography" : topography,
 
     "selector" : {
         "vertex": { "limit": 3.0 }},
@@ -85,21 +87,24 @@ import grand_tour
 topo = grand_tour.Topography(**options["topography"])
 
 dc = 500.
-n = int(ARRAY_SIZE / dc) + 1
-positions = []
-for i in xrange(n):
-    yi = -0.5 * ARRAY_SIZE + i * dc
-    for j in xrange(n):
-        xj = -0.5 * ARRAY_SIZE + j * dc
-        zij = topo.ground_altitude(xj, yi) + ANTENNA_HEIGHT
-        positions.append((xj, yi, zij))
-
+nx, ny = map(lambda x: int(x / dc) + 1, ARRAY_SIZE)
+setup = []
+for i in xrange(ny):
+    yi = -0.5 * ARRAY_SIZE[1] + i * dc
+    for j in xrange(nx):
+        xj = -0.5 * ARRAY_SIZE[0] + j * dc
+        uij, alpha, beta = topo.ground_normal(xj, yi, angles=True)
+        zij = topo.ground_altitude(xj, yi)
+        setup.append((xj + uij[0] * ANTENNA_HEIGHT,
+                      yi + uij[1] * ANTENNA_HEIGHT,
+                      zij + uij[2] * ANTENNA_HEIGHT,
+                      alpha, beta))
 
 # Run RETRO
 print ""
 print "# Running RETRO ..."
 t0 = time.time()
 outfile = "events.{:}.json".format(tag)
-ccin2p3.retro_run(N_EVENTS, options, positions, path=os.path.join(
+ccin2p3.retro_run(N_EVENTS, options, setup, path=os.path.join(
     OUTDIR, outfile))
 print "  --> Done in {:.1f} s".format(time.time() - t0)

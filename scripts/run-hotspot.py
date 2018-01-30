@@ -32,7 +32,7 @@
 # Request access to iRODS and /sps
 #$ -l irods=1,sps=1
 #===============================================================================
-"""Generate tau decays for the hotspot array of 100x100 km2
+"""Generate tau decays for the hotspot array of 66x150 km2
 """
 
 import sys
@@ -46,9 +46,9 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "379515e"
+RETRO_HASHTAG = "e9ec939"
 N_EVENTS = 1000
-OUTDIR = "irods://grand/test/hotspot-theta1"
+OUTDIR = "irods://grand/test/hotspot-sel3"
 
 topography = {
     "latitude" : 42.1,
@@ -96,7 +96,7 @@ for i in xrange(ny):
     for j in xrange(nx):
         xj = -0.5 * ARRAY_SIZE[0] + j * dc
         uij, alpha, beta = topo.ground_normal(xj, yi, angles=True)
-        zij = topo.ground_altitude(xj, yi)        
+        zij = topo.ground_altitude(xj, yi)
         setup.append((xj + uij[0] * ANTENNA_HEIGHT,
                       yi + uij[1] * ANTENNA_HEIGHT,
                       zij + uij[2] * ANTENNA_HEIGHT,
