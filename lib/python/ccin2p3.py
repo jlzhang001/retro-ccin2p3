@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 
 TOPO_PATH = "/sps/hep/trend/neu/maps/ASTER-GDEM2"
 
@@ -118,4 +119,12 @@ def retro_run(events, options, setup=None, path=None):
     # Copy the data if required
     if path.startswith("irods://"):
         path = path.split("irods://")[-1]
-        system("iput -f {:} {:}".format(outfile, path))
+        for i in xrange(20):
+            try:
+                system("iput -f {:} {:}".format(outfile, path))
+            except RuntimeError:
+                time.sleep(6.)
+            else:
+                break
+        else:
+            print "error: failed to upload", outfile

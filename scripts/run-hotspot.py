@@ -46,7 +46,7 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "e9ec939"
+RETRO_HASHTAG = "ff56d22"
 N_EVENTS = 1000
 OUTDIR = "irods://grand/test/hotspot-sel3"
 

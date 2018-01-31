@@ -46,14 +46,14 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "e9ec939"
+RETRO_HASHTAG = "ff56d22"
 N_EVENTS = 1000
 OUTDIR = "irods://grand/test/flat-sel3"
 
 topography = {
     "latitude" : 42.1,
     "longitude" : 86.3,
-    "path" : "flat/12" }
+    "path" : "flat/15" }
 
 
 # Install RETRO
