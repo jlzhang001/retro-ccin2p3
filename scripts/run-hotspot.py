@@ -48,7 +48,7 @@ ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
 RETRO_HASHTAG = "5f5bc54"
 N_EVENTS = 1000
-OUTDIR = "irods://grand/test/hotspot-sel3"
+OUTDIR = "irods://grand/test/hotspot-sel4"
 
 topography = {
     "latitude" : 42.1,
@@ -76,7 +76,7 @@ options = {
     "topography" : topography,
 
     "selector" : {
-        "vertex": { "limit": 3.0 }},
+        "vertex": { "limit": 4.0 }},
 
     "primary": {
         "events": 10000,
