@@ -25,20 +25,21 @@ with open("share/events.triggers.p", "rb") as f:
     n, latitude, longitude, rate = pickle.load(f)
 
 # Compute the topography
-ratet = numpy.transpose(rate)
-
-h = numpy.zeros(ratet.shape)
+h = numpy.zeros(rate.shape)
 for i, la in enumerate(latitude):
     for j, lo in enumerate(longitude):
         h[i, j] = topo.ground_altitude(la, lo, geodetic=True)
 
 # Show the map
-#plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
+try:
+    plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
+except:
+    pass
 
 plt.figure()
 norme = colors.Normalize(vmin=0,vmax=numpy.max(h))
 plt.contour(longitude, latitude, h, 30, cmap="terrain",norm=norme)
-plt.pcolor(longitude, latitude, ratet, cmap="nipy_spectral", norm=LogNorm(),
+plt.pcolor(longitude, latitude, rate, cmap="nipy_spectral", norm=LogNorm(),
            alpha=0.5)
 plt.colorbar()
 plt.xlabel(r"longitude (deg)")

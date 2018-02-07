@@ -97,8 +97,14 @@ plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-altitude.png")
 
 # Estimate the decay density
-rate, xe, ye = numpy.histogram2d(data[:, 6], data[:, 5], 100,
-                                 normed=True, weights=data[:, 0])
+def histogram2d(*args, **kwargs):
+    """Encapsulate numpy.histogram2d for matrix convention compatibility"""
+    n, x, y = numpy.histogram2d(*args, **kwargs)
+    n = n.T
+    return n, x, y
+
+rate, xe, ye = histogram2d(data[:, 6], data[:, 5], 100,
+                           normed=True, weights=data[:, 0])
 rate *= mu
 x = 0.5 * (xe[1:] + xe[:-1])
 y = 0.5 * (ye[1:] + ye[:-1])

@@ -18,6 +18,11 @@ def primary_flux(e):
     """Waxman-Bahcall bound with 1 / 3 of tau neutrinos"""
     return 2E-04 / (3. * e**2)
 
+def histogram2d(*args, **kwargs):
+    """Encapsulate numpy.histogram2d for matrix convention compatibility"""
+    n, x, y = numpy.histogram2d(*args, **kwargs)
+    n = n.T
+    return n, x, y
 
 def add_triggers(event, latitude, longitude, rate):
     """Extract the antenna trigger rates from an event"""
@@ -32,7 +37,7 @@ def add_triggers(event, latitude, longitude, rate):
             la.append(lla[0])
             lo.append(lla[1])
         if la:
-            p, _, _ = numpy.histogram2d(lo, la, (longitude, latitude))
+            p, _, _ = histogram2d(lo, la, (longitude, latitude))
             rate += w * p
     return n
 
@@ -48,7 +53,7 @@ def antennas_density(latitude, longitude):
             lla = topo.local_to_lla((xj, yi, zij))
             la.append(lla[0])
             lo.append(lla[1])
-    p, _, _ = numpy.histogram2d(lo, la, (longitude, latitude))
+    p, _, _ = histogram2d(lo, la, (longitude, latitude))
     return p
 
 def process(path, latitude, longitude, rate):
@@ -67,7 +72,6 @@ def process(path, latitude, longitude, rate):
     if generated > 0:
         d = antennas_density(latitude, longitude)
         rate /= (generated * d)
-    print rate.max()
     latitude = 0.5 * (latitude[1:] + latitude[:-1])
     longitude = 0.5 * (longitude[1:] + longitude[:-1])
 
