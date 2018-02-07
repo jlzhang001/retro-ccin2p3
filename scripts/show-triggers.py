@@ -9,7 +9,9 @@ import cPickle as pickle
 
 import numpy
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 from matplotlib.colors import LogNorm
+
 
 from grand_tour import Topography
 
@@ -23,17 +25,20 @@ with open("share/events.triggers.p", "rb") as f:
     n, latitude, longitude, rate = pickle.load(f)
 
 # Compute the topography
-h = numpy.zeros(rate.shape)
+ratet = numpy.transpose(rate)
+
+h = numpy.zeros(ratet.shape)
 for i, la in enumerate(latitude):
     for j, lo in enumerate(longitude):
         h[i, j] = topo.ground_altitude(la, lo, geodetic=True)
 
 # Show the map
-plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
+#plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
 plt.figure()
-plt.contour(longitude, latitude, h, 10, colors="k")
-plt.pcolor(longitude, latitude, rate, cmap="nipy_spectral", norm=LogNorm(),
+norme = colors.Normalize(vmin=0,vmax=numpy.max(h))
+plt.contour(longitude, latitude, h, 30, cmap="terrain",norm=norme)
+plt.pcolor(longitude, latitude, ratet, cmap="nipy_spectral", norm=LogNorm(),
            alpha=0.5)
 plt.colorbar()
 plt.xlabel(r"longitude (deg)")
