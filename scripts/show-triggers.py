@@ -36,6 +36,7 @@ try:
 except:
     pass
 
+
 plt.figure()
 norme = colors.Normalize(vmin=0,vmax=numpy.max(h))
 plt.contour(longitude, latitude, h, 30, cmap="terrain",norm=norme)

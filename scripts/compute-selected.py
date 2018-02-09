@@ -10,19 +10,14 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.colors as colors
 
 from retro.event import EventIterator
-
 from grand_tour import Topography
+from common import checkTrig
 
 
 # Get the global topography handle
-topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",
-                  stack_size=49)
+topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",stack_size=49)
 
 DISPLAY = 1
-noise = 15. #uV/
-th = 2*3*noise  # Agressive
-#th = 2*6*noise  # Conservative
-ntrigthresh = 8
 
 #plt.style.use("../retro/plugins/display/deps/mplstyle-l3/style/l3.mplstyle")
 
@@ -33,81 +28,59 @@ def primary_flux(e):
 
 def add_triggers(event, latitude, longitude, rate):
     """Extract the antenna trigger rates from an event"""
+
+    
     year = 365.25 * 24. * 60. * 60.
     w = [v[0] * primary_flux(v[1]) for v in event["primaries"]]
     w = sum(w) * year / event["statistics"][1]
     n = event["statistics"][0]
-    la, lo = [], []
-    if w > 0.:
-        antsin = []
-        Ampx=[]
-        Ampy=[]
-        Ampz=[]
-        Ampxy = [];
-        v = np.array(event["voltage"])
-        for i in range(np.shape(v)[0]):
-          antsin.append(int(v[i,0]))  # Index of antennas with radio simulation
-          Ampx.append(float(v[i,1]))  # NS arm
-          Ampy.append(float(v[i,2]))  # EW arm
-          Ampxy.append(float(v[i,4]))  # EW arm
-          Ampz.append(float(v[i,3]))  # Vert arm
-        
-	antsin = np.array(antsin)
- 	Ampx = np.array(Ampx)
- 	Ampy = np.array(Ampy)
- 	Ampz = np.array(Ampz)
- 	Ampxy = np.array(Ampxy)
-	trigMat = np.array([Ampx>th,Ampy>th,Ampz>th,Ampxy>th/np.sqrt(2)])
 
-	ntrigs = trigMat.sum(axis=1)
-	print 'Nb of trigged ants (NSarm, EWarm, Vert arm, EW+NS):',ntrigs
-	print 'N antennas trigged:',np.max(ntrigs)
-	ich = np.argmax(ntrigs)
-	indTrig = np.where(trigMat[ich,:])
-	tAnts = antsin[indTrig]
-        xant, yant = [], []
-	if np.max(ntrigs)>=ntrigthresh:
-            j = 0
-	    for x, y, z, _, _ in event["antennas"]:
-	        if np.any(tAnts==j):
-                  lla = topo.local_to_lla((x, y, z))
-                  la.append(lla[0])
-                  lo.append(lla[1])
-		  xant.append(x)
-		  yant.append(y)
-		j+=1
-		
-            if la:
-                p, _, _ = np.histogram2d(lo, la, (longitude, latitude))
-                rate += w * p
-		
-	    if DISPLAY:
-	      # Now do plots
-	      #
-	      xant = np.array(xant)
-	      yant = np.array(yant)
-	      z = np.array(z)
-	
-	      yantr = yant[::-1] # Pointing east
-	      plt.figure(31)
- 	      plt.scatter(yantr/1e3,xant/1e3, marker='o', alpha=0.75)
- 	      plt.xlabel(r"Easting (km)")
- 	      plt.ylabel(r"Northing (km)")
-	      plt.grid(True)
-	
- 	      la = np.array(la)
- 	      lo = np.array(lo)
- 	      # LatLong
- 	      plt.figure(32)
- 	      plt.scatter(lo,la, marker='o', alpha=0.75)
- 	      plt.xlabel(r"longitude (deg)")
- 	      plt.ylabel(r"latitude (deg)")
-	      plt.grid(True)
-	
-	      fig = plt.figure(1)
-	      plt.scatter(yantr/1e3,xant/1e3,marker='o')
-	      fig = plt.figure(2)
-	      plt.scatter(lo,la,marker='o')
+    [bTrig,_,antsIDs] = checkTrig(event) 
+    la, lo = [],[]
+    xant, yant = [],[]
+    
+    if bTrig:  # Shower was detected!
+      j = 0
+      for x, y, z, _, _ in event["antennas"]:
+          if np.any(antsIDs==j):  #This is a trigged antenna
+            lla = topo.local_to_lla((x, y, z))
+            la.append(lla[0])
+            lo.append(lla[1])
+	    xant.append(x)
+	    yant.append(y)
+	  j+=1
+
+      if la:
+          p, _, _ = np.histogram2d(lo, la, (longitude, latitude))
+          rate += w * p
+
+      if DISPLAY:
+        # Now do plots
+        #
+        xant = np.array(xant)
+        yant = np.array(yant)
+        z = np.array(z)
+
+        yantr = yant[::-1] # Pointing east
+        plt.figure(31)
+        plt.scatter(yantr/1e3,xant/1e3, marker='o', alpha=0.75)
+        plt.xlabel(r"Easting (km)")
+        plt.ylabel(r"Northing (km)")
+        plt.grid(True)
+
+        la = np.array(la)
+        lo = np.array(lo)
+        # LatLong
+        plt.figure(32)
+        plt.scatter(lo,la, marker='o', alpha=0.75)
+        plt.xlabel(r"longitude (deg)")
+        plt.ylabel(r"latitude (deg)")
+        plt.grid(True)
+
+        fig = plt.figure(1)
+        plt.scatter(yantr/1e3,xant/1e3,marker='o')
+        fig = plt.figure(2)
+        plt.scatter(lo,la,marker='o')
 	    
     return n
 
@@ -185,8 +158,9 @@ def process(path, latitude, longitude, rate):
     while path.endswith("/"):
         path = path[:-1]
     path += ".triggers.p"
+    ratet = np.transpose(rate)
     with open(path, "wb+") as f:
-        pickle.dump((generated, latitude, longitude, rate), f, -1)
+        pickle.dump((generated, latitude, longitude, ratet), f, -1)
     print "o Triggers dumped to", path
     print "  --> All done in {:.1f} s".format(time.time() - tstart)
 
