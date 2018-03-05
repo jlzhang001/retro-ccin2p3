@@ -11,7 +11,7 @@ import numpy
 from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-
+from scipy import stats
 from grand_tour import Topography
 
 
@@ -106,7 +106,7 @@ def doTopoPlot(data):
   dx, dy = 0.5 * 66.5E+03, 0.5 * 150.4E+03
   y0, x0, _ = topo.local_to_lla((-dx, -dy, 0.))
   y1, x1, _ = topo.local_to_lla((dx, dy, 0.))
-  plt.plot((x0, x0, x1, x1, x0), (y0, y1, y1, y0, y0), "w-")
+  plt.plot((x0, x0, x1, x1, x0), (y0, y1, y1, y0, y0), "w-",lw=5)
   plt.colorbar()
   plt.xlabel(r"longitude (deg)")
   plt.ylabel(r"latitude (deg)")
@@ -122,14 +122,74 @@ def histogram2d(*args, **kwargs):
 
 
 col = ["k","r","g"]
-files = ["share/HS1.p", "share/HS1_sel.p.5ants.4s"]
+#files = ["share/HS1.p", "share/HS1_sel1000.p.5ants.4s"]
+#files = ["share/HS1_sel500.p.5ants.4s", "share/HS1_sel1000.p.5ants.4s"]
+#files = ["share/HS1_sel1000.p.5ants.3s"]
+files = ["share/HS1_cone500.p"]
+#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/jsons_sel.p"]
 for i in range(len(files)):
 # Load the reduced events
   print"Opening",files[i]
   with open(files[i], "rb") as f:
-    n, data = pickle.load(f)
+    n, data, dataAnts = pickle.load(f)
   data = numpy.array(data)
-
+  ncones = data[:,10]/4 # Scale down to 1000m step
+  nants = data[:,11]
+  ntrigs = data[:,12]
+  plt.figure(23)
+  plt.subplot(311)
+  plt.hist(numpy.log10(ncones),100)
+  plt.xlim(0.1,max(numpy.log10(ncones)))
+  plt.xlabel(r"$log_{10}(N_{Cone}^*)$")
+  plt.title('$N_{ants}$ in events (trigged)')
+  print stats.describe(ncones)
+  plt.subplot(312)
+  plt.hist(numpy.log10(nants),100)
+  plt.xlim(0.1,max(numpy.log10(ncones)))
+  plt.xlabel(r"$log_{10}(N_{RadioSim})$")
+  print stats.describe(nants)
+  plt.subplot(313)
+  plt.hist(numpy.log10(ntrigs),100)
+  plt.xlim(0.1,max(numpy.log10(ncones)))
+  plt.xlabel(r"$log_{10}(N_{Trig})$")
+  print stats.describe(ntrigs)
+  
+  
+  #print dataAnts
+  #print len(dataAnts)
+  #for i in range(len(dataAnts)):
+  # print dataAnts[i,3] 
+  #alpha = dataAnts[:,3]
+  #beta = dataAnts[:,4]
+  #dataAnts = numpy.array(dataAnts[:,0:2])
+  #ncones = dataAnts[:,0]/4 # Scale down to 1000m step
+  #nants = dataAnts[:,1]
+  #ntrigs = dataAnts[:,2]
+  #
+  #print stats.describe(ncones)
+  #print stats.describe(nants)
+  #print stats.describe(ntrigs)
+  #plt.figure(24)
+  #plt.subplot(311)
+  #plt.hist(numpy.log10(ncones[ncones>0]),100)
+  #plt.xlim(0.1,max(numpy.log10(ncones)))
+  #plt.xlabel(r"$log_{10}(N_{Cone}^*$)")
+  #plt.title('$N_{ants}$ in events (all)')
+  #plt.subplot(312)
+  #plt.hist(numpy.log10(nants[nants>0]),100)
+  #plt.xlim(0.1,max(numpy.log10(ncones)))
+  #plt.xlabel(r"$log_{10}(N_{RadioSim})$")
+  #plt.subplot(313)
+  #plt.hist(numpy.log10(ntrigs[ntrigs>0]),100)
+  #plt.xlim(0.1,max(numpy.log10(ncones)))
+  #plt.xlabel(r"$log_{10}(N_{Trig})$")
+  
+  #plt.figure(37)
+  #plt.subplot(211)
+  #plt.hist(alpha,100)
+  #plt.subplot(212)
+  #plt.hist(beta,100)
+  
   # Print the total rate  
   mu = sum(data[:,0]) / n 
   sigma = sum(data[:,0]**2) / n

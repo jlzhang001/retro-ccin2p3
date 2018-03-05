@@ -21,7 +21,7 @@ def load(path):
     """Load and parse a set of decay files
     """
     theta, phi, altitude = [], [], []
-    position, energy, weight = [], [], []
+    position, energy, weight = [], [], [] 
     generated = 0
     for name in os.listdir(path):
         if not name.startswith("events"):

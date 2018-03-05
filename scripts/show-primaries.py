@@ -31,24 +31,31 @@ def compute_spectrum(samples, weight, generated):
     dp = numpy.sqrt((n2 - n * n) / generated) * norm
     return x, p, xerr, dp
 
-def doPlots(n,x, p, dx, dp,col="k",leg=""):
+def doPlots(n,x, p, dx, dp,lin='-',col="k",leg=""):
     # Show the distributions
     plt.figure(1)
-    plt.loglog(x, p * x, col)
-    plt.errorbar(x, p * x, xerr=dx, yerr=dp * x, fmt=col,label=leg)
+    plt.loglog(x, p * x, linestyle=lin,color=col,lw=4,label=leg)
+    #plt.errorbar(x, p * x, xerr=dx, yerr=dp * x, fmt=col+'+')
     plt.xlabel(r"energy, E$_\nu$ (GeV)")
     plt.ylabel(r"E$_\nu \times$ rate (yr$^{-1}$)")
-    plt.axis((1E+07, 1E+12, 1E-03, 1E+01))
+    plt.axis((3E+07, 1E+12, 1E-03, 1E+01))
 
     plt.figure(2)
     norm = 1. / primary_flux(x)
     y, dy = p * norm, dp * norm
-    plt.loglog(x, y, col)
-    plt.errorbar(x, y, xerr=dx, yerr=dy, fmt=col)
+    plt.loglog(x, y, color=col,linestyle=lin,lw=4,label=leg)
+    #plt.errorbar(x, y, xerr=dx, yerr=dy, fmt=col+'+')
     plt.xlabel(r"energy, E$_\nu$ (GeV)")
     plt.ylabel(r"exposure, 1 year (cm$^2$ s sr)")
-    plt.axis((1E+07, 1E+12, 1E+15, 1E+19))
+    plt.axis((3E+07, 1E+12, 1E+15, 1E+18))
+    plt.grid(True)
 
+    exi = numpy.array(range(70,120,1))/10.  # Conformed energy set
+    xi = numpy.power(10,exi)
+    yi = numpy.interp(xi,x,y) # Interpolated values for the comformed energy set
+    
+    return xi,yi
+    
 def getRate(pfile):
     # Load the reduced events
     with open(pfile, "rb") as f:
@@ -63,27 +70,82 @@ def getRate(pfile):
 
     return n, data
 
-files = ["share/HS1.primaries.p","share/HS1_sel.primaries.p.5ants.4s","share/HS1_sel.primaries.p.8ants.10s",]
-col = ["k","r","g","b"]
-leg = ['Cone selection','Ag.: 5 ants>60$\muV$pp','Cons: 8 ants>150$\muV$pp']
+files = ["share/HS1_cone500.primaries.p","share/HS1_sel500.primaries.p.5ants.3s","share/HS1_sel500.primaries.p.8ants.10s","share/HS1_sel1000.primaries.p.5ants.3s","share/HS1_sel1000.primaries.p.8ants.10s","share/HS1_sel1500.primaries.p.5ants.3s","share/HS1_sel1500.primaries.p.8ants.10s"]
+#files = ["share/jsons.primaries_sel.p"]
+col = ["k","r","b","r","b","r","b"]
+lin = ["-",":",":","-","-","--","--"]
+
+leg = ['Cone','Agr. 500m','Cons. 500m','Agr. 1000m','Cons. 1000m','Agr. 1500m','Cons. 1500m']
+yv = numpy.zeros([len(files),50])
 for i in range(len(files)):
     print "Loading",files[i]
     n, data = getRate(files[i])
     x, p, dx, dp = compute_spectrum(data[:, 1], data[:, 0], n)
-    doPlots(n,x, p, dx, dp,col[i],leg=leg[i])
-
+    xi,yv[i,:] = doPlots(n,x, p, dx, dp,lin[i],col[i],leg[i])   
+    plt.legend(loc='best')
+    
 eprel = 1e11*numpy.array([0.0010,0.0030,0.0100,0.0300,0.1000,0.3000,1.0000,3.0000])
-exposureprel = 1e17*numpy.array([0.0260,0.2619,0.9504,1.7266,2.5552,3.4848,4.5618,5.2054])
-exposureprelc = 1e+17 *numpy.array([0,0.0769,0.5324,1.2734,2.0508,2.7981,4.1219,5.0788])
-exposureprel = exposureprel*10000/7500  # Scale from 7500 to 1000km2
-exposureprels = exposureprelc*10000/7500  # Scale from 7500 to 1000km2
+expprea = 1e17*numpy.array([0.0260,0.2619,0.9504,1.7266,2.5552,3.4848,4.5618,5.2054])
+expprec = 1e+17 *numpy.array([0,0.0769,0.5324,1.2734,2.0508,2.7981,4.1219,5.0788])
+exppreai = numpy.interp(xi,eprel,expprea)
+exppreci = numpy.interp(xi,eprel,expprec)
+#exppreai = exppreai*10000/7500  # Scale from 7500 to 1000km2 
+#exppreci = exppreci*10000/7500  # Scale from 7500 to 1000km2
 
 plt.figure(1)
+plt.legend(loc='best')
 plt.savefig("primaries-rate.png")
 plt.figure(2)
-plt.loglog(eprel,exposureprel,'r--',label="Prelim, ag.")
-plt.loglog(eprel,exposureprelc,'g--',label="Prelim, cons.")
-#plt.legend('loc=best')
+plt.loglog(xi,exppreai,'r-.',lw=3,label="Agr. (prelim)")
+plt.loglog(xi,exppreci,'g-.',lw=3,label="Cons. (prelim)")
+plt.legend(loc='best')
 plt.savefig("exposure.png")
 
+ra500 = yv[1,:]/yv[3,:]  # 500/1000
+ra1500 = yv[5,:]/yv[3,:]  # 1500/1000
+rc500 = yv[2,:]/yv[4,:]  # 500/1000
+rc1500 = yv[6,:]/yv[4,:]  # 1500/1000
+rac= yv[4,:]/yv[3,:]  # Conservative to Agressive
+rpa = exppreai/yv[3,:]  # Agressive prel to Agressive now
+rca = exppreci/yv[4,:]  # Conservative prel to Conservative now
+
+plt.figure(21)
+plt.loglog(xi, yv[3,:], color="r",lw=4,label='Agr. (1000m) ')
+plt.loglog(xi, yv[4,:], color="b",lw=4,label='Cons. (1000m)')
+plt.loglog(xi,exppreai,'r-.',lw=3,label="Prelim agr. (800m)")
+plt.loglog(xi,exppreci,'b-.',lw=3,label="Prelim cons. (800m)")
+plt.legend(loc='best')
+plt.xlabel(r"energy, E$_\nu$ (GeV)")
+plt.ylabel(r"exposure, 1 year (cm$^2$ s sr)")
+plt.axis((1E+08, 1E+12, 1E+14, 1E+18))
+plt.grid(True)
+    
+plt.figure(3)
+plt.semilogx(xi,ra500,':r',lw=3,label='500m/1000m (Agr.)')
+plt.semilogx(xi,ra1500,'--r',lw=3,label='1500m/1000m (Agr.)')
+plt.semilogx(xi,rc500,':b',lw=3,label='500m/1000m (Cons.)')
+plt.semilogx(xi,rc1500,'--b',lw=3,label='1500m/1000m (Cons.)')
+plt.grid(True)
+plt.legend(loc='best')
+plt.axis((1E+08, 1E+12, 0, 4))
+plt.xlabel(r"energy, E$_\nu$ (GeV)")
+plt.ylabel(r"Exposure ratio")
+
+plt.figure(31)
+plt.semilogx(xi,rac,'k-',lw=3)
+plt.grid(True)
+plt.axis((1E+08, 1E+12, 0, 1))
+plt.xlabel(r"energy, E$_\nu$ (GeV)")
+plt.ylabel(r"Exposure ratio Cons./Agr.")
+
+plt.figure(32)
+plt.semilogx(xi,rpa,'r-',lw=3,label='Prelim agr./Agr.')
+plt.semilogx(xi,rca,'b-',lw=3,label='Prelim cons./Cons')
+plt.grid(True)
+plt.legend(loc='best')
+plt.axis((1E+08, 1E+12, 0, 4))
+plt.xlabel(r"energy, E$_\nu$ (GeV)")
+plt.ylabel(r"Exposure ratio")
+    
 plt.show()
+

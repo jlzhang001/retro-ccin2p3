@@ -6,6 +6,10 @@ import time
 import numpy as np
 from retro.event import EventIterator
 from common import checkTrig
+from common import checkCluster
+from common import setStep
+
+#sys.path.append("../retro/lib/python/retro/")
 
 
 def primary_flux(e):
@@ -21,18 +25,18 @@ def summarise_primaries(event,opt='sel'):
     
     n = event["statistics"][0]
     data = None
-
+        
     if opt == 'sel':
-    	[bTrig,_,antsIDs] = checkTrig(event,5,'a') 
+    	_,antsIDs = checkTrig(event,'a') 
+	bTrig, bCluster = checkCluster(event,antsIDs,'a')
     else:
         bTrig = True
-	
     if bTrig:  # Shower was detected!
     	v2 = event["primaries"]
 	data = []
 	for k in range(len(v2)):
 	    data.append([v2[k][0] * primary_flux(v2[k][1]) * nrm, v2[k][1]])
-	    	  
+	        	    	  
     return n, data
 
 
@@ -42,7 +46,6 @@ def process(path,summarise,opt='sel'):
     nf = 0
     generated, data = 0, []
     for name in os.listdir(path):
-#        if not name.startswith("events"):
         if not name.endswith("json"):
             continue
 	nf += 1
@@ -51,10 +54,10 @@ def process(path,summarise,opt='sel'):
         #print "o Processing", filename
         for event in EventIterator(filename):
             n, d = summarise_primaries(event,opt='sel')
-            generated += n
+	    generated += n
             if d is not None:
                 data += d
-        #print "  --> Done in {:.1f} s".format(time.time() - t0)
+	#print "  --> Done in {:.1f} s".format(time.time() - t0)
 	if float(nf)/100 == np.floor(nf/100):
 		print 'Nb of json files processed:',nf
 	#if nf==1000:

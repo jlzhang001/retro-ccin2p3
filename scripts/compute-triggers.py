@@ -18,7 +18,7 @@ from common import checkTrig
 topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",stack_size=49)
 
 DISPLAY = 1
-
+step = 500
 plt.style.use("../retro/plugins/display/deps/mplstyle-l3/style/l3.mplstyle")
 
 def primary_flux(e):
@@ -40,7 +40,7 @@ def add_triggers(event, latitude, longitude, rate, opt='sel'):
     n = event["statistics"][0]
 
     if opt=='sel':
-        [bTrig,_,antsIDs] = checkTrig(event) 
+        [bTrig,antsIDs] = checkTrig(event) 
     else:
         bTrig = True
 	x = np.array(event["antennas"])[:,0]
@@ -95,7 +95,7 @@ def add_triggers(event, latitude, longitude, rate, opt='sel'):
 
 def antennas_density(latitude, longitude):
     """Compute the density of antennas"""
-    Dx, Dy, s = 0.5 * 66.5E+03, 0.5 * 150.4E+03, 500.
+    Dx, Dy, s = 0.5 * 66.5E+03, 0.5 * 150.4E+03, step
     x = np.arange(-Dx, Dx + s, s)
     y = np.arange(-Dy, Dy + s, s)
     z = np.zeros((len(y),len(x)))
@@ -149,15 +149,23 @@ def process(path, latitude, longitude, rate,opt='sel'):
     """Process a set of event files"""
     tstart = time.time()
     generated, data = 0, []
+    nf = 0
     for name in os.listdir(path):
-        if not name.endswith("json"):
+        nf += 1
+	if not name.endswith("json"):
 	    continue
 	filename = os.path.join(path, name)
         t0 = time.time()
-        print "o Processing", filename
+        #print "o Processing", filename
         for event in EventIterator(filename):
             generated += add_triggers(event, latitude, longitude, rate,opt)
-        print "  --> Done in {:.1f} s".format(time.time() - t0)
+        #print "  --> Done in {:.1f} s".format(time.time() - t0)
+	if float(nf)/100 == np.floor(nf/100):
+  	  print 'Nb of json files processed:',nf
+  	if nf==1000:
+	  break
+
+
     if generated > 0:
         d = antennas_density(latitude, longitude)
         rate /= (generated * d)
@@ -169,7 +177,7 @@ def process(path, latitude, longitude, rate,opt='sel'):
     path += ".triggers.p"
     #ratet = np.transpose(rate)
     with open(path, "wb+") as f:
-        pickle.dump((generated, latitude, longitude, ratet), f, -1)
+        pickle.dump((generated, latitude, longitude, rate), f, -1)
     print "o Triggers dumped to", path
     print "  --> All done in {:.1f} s".format(time.time() - tstart)
 
