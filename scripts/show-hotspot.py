@@ -65,25 +65,33 @@ def doPlots(n, data,col="k"):
   plt.savefig("tau-ratio.png")
 
   plot_histogram(data[:, 8], data[:, 0],n,col=col,figID=3)
-  plt.axis((85., 95., 0., 6.))
+  #plt.axis((85., 95., 0., 6.))
+  plt.xlim(85., 95.)
   plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
   plt.ylabel(r"rate (deg$^{-1}$ yr$^{-1}$)")
   plt.savefig("tau-zenith.png")
 
   plot_histogram(data[:, 9], data[:, 0], n,col=col,figID=4)
   plt.xticks(numpy.linspace(-180., 180., 5))
-  plt.axis((-200., 200., 0., 1E-01))
-  plt.yticks(numpy.linspace(0., 1E-01, 5))
+  #plt.axis((-200., 200., 0., 1E-01))
+  #plt.yticks(numpy.linspace(0., 1E-01, 5))
+  plt.xlim(-180., 180.)
   plt.xlabel(r"azimuth, $\phi_\tau$ (deg)")
   plt.ylabel(r"rate (deg$^{-1}$ yr$^{-1}$)")
   #plt.savefig("tau-azimuth.png")
 
-  plot_histogram(data[:, 7] * 1E-03, data[:, 0], n,col=col,figID=5, plot=plt.semilogy)
-  plt.axis((0., 5., 1E-02, 1E+01))
-  plt.xlabel(r"decay altitude, h$_\tau$ (km)")
+  plot_histogram(data[:, 7], data[:, 0], n,col=col,figID=5)
+  #plt.axis((0., 5., 1E-02, 1E+01))
+  plt.xlabel(r"decay altitude, h$_\tau$ (m)")
   plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
   plt.savefig("tau-altitude.png")
 
+  plot_histogram(data[:, 10], data[:, 0], n,col=col,figID=6)
+  plot_histogram(data[:, 11], data[:, 0], n,col='r',figID=6)
+  plt.xlabel(r"decay height above ground (m)")
+  plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
+  plt.savefig("tau-height.png")
+  
 
 def doTopoPlot(data):
   rate, xe, ye = histogram2d(data[:, 6], data[:, 5], 100,
@@ -125,71 +133,73 @@ col = ["k","r","g"]
 #files = ["share/HS1.p", "share/HS1_sel1000.p.5ants.4s"]
 #files = ["share/HS1_sel500.p.5ants.4s", "share/HS1_sel1000.p.5ants.4s"]
 #files = ["share/HS1_sel1000.p.5ants.3s"]
-files = ["share/HS1_cone500.p"]
-#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/jsons_sel.p"]
+#files = ["share/HS1_sel1000.p.5ants.3s","share/HS1flat_sel1000.p.5ants.3s"]
+#files = ["share/flat_sel1000.p.5ants.3s"]
+
+files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1_sel.p"]
+#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1flat/HS1flat_sel.p"]
 for i in range(len(files)):
 # Load the reduced events
   print"Opening",files[i]
   with open(files[i], "rb") as f:
-    n, data, dataAnts = pickle.load(f)
+    n, data = pickle.load(f)
   data = numpy.array(data)
-  ncones = data[:,10]/4 # Scale down to 1000m step
-  nants = data[:,11]
-  ntrigs = data[:,12]
+  theta = data[:, 8]
+  ncones = data[:,12]/4 # Scale down by 4 for 500-->1000m step
+  nvolts = data[:,13]/4 # Scale down by 4 for 500-->1000m step
+  ntrigs = data[:,14]
+  nclust = data[:,15]
+  dmin = data[:,16]
+  dmax = data[:,17]
+  
+  plt.figure(17)
+  plt.subplot(221)
+  plt.hist(dmin[dmin>0],100)
+  plt.xlabel('Dmin (km)')
+  plt.subplot(222)
+  plt.plot(theta[dmin>0],dmin[dmin>0],'ob')
+  plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
+  plt.ylabel('Dmin (km)')
+  plt.subplot(223)
+  plt.hist(dmax[dmax>0],100)
+  plt.xlabel('Dmax (km)')
+  plt.subplot(224)
+  plt.plot(theta[dmin>0],dmax[dmax>0],'ob')
+  plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
+  plt.ylabel('Dmax (km)')
+  
+  print "Nb events with antennas further than 90km:",sum(dmin>90)
+  
   plt.figure(23)
-  plt.subplot(311)
-  plt.hist(numpy.log10(ncones),100)
-  plt.xlim(0.1,max(numpy.log10(ncones)))
+  plt.title('$N_{ants}$ in events (with 1+ voltage')
+  plt.subplot(411)
+  plt.hist(numpy.log10(ncones[ncones>0]),100)
+  #plt.xlim(0.1,max(numpy.log10(ncones)))
   plt.xlabel(r"$log_{10}(N_{Cone}^*)$")
-  plt.title('$N_{ants}$ in events (trigged)')
-  print stats.describe(ncones)
-  plt.subplot(312)
-  plt.hist(numpy.log10(nants),100)
-  plt.xlim(0.1,max(numpy.log10(ncones)))
-  plt.xlabel(r"$log_{10}(N_{RadioSim})$")
-  print stats.describe(nants)
-  plt.subplot(313)
-  plt.hist(numpy.log10(ntrigs),100)
-  plt.xlim(0.1,max(numpy.log10(ncones)))
+  print "\n**** All stats only for events with 1+ voltage***"
+  print "Cones stats: [N,minAnts,maxAnts,<Ants>]",len(ncones),numpy.min(ncones),numpy.max(ncones),numpy.mean(ncones)
+  #stats.describe(ncones)
+  plt.subplot(412)
+  plt.hist(numpy.log10(nvolts[nvolts>0]),100)
+  #plt.xlim(0.1,max(numpy.log10(ncones)))
+  plt.xlabel(r"$log_{10}(N_{RadioSim}^*)$")
+  print "Radio sim stats: [N,minAnts,maxAnts,<Ants>]",len(nvolts[nvolts>0]),numpy.min(nvolts[nvolts>0]),numpy.max(nvolts[nvolts>0]),numpy.mean(nvolts[nvolts>0])
+  print "Radio sim stats (events with 5+ ants): [N,minAnts,maxAnts,<Ants>]",len(nvolts[nvolts>4]),numpy.min(nvolts[nvolts>4]),numpy.max(nvolts[nvolts>4]),numpy.mean(nvolts[nvolts>4])
+  
+  plt.subplot(413)
+  plt.hist(numpy.log10(ntrigs[ntrigs>0]),100)
+  #plt.xlim(0.1,max(numpy.log10(ncones)))
   plt.xlabel(r"$log_{10}(N_{Trig})$")
-  print stats.describe(ntrigs)
-  
-  
-  #print dataAnts
-  #print len(dataAnts)
-  #for i in range(len(dataAnts)):
-  # print dataAnts[i,3] 
-  #alpha = dataAnts[:,3]
-  #beta = dataAnts[:,4]
-  #dataAnts = numpy.array(dataAnts[:,0:2])
-  #ncones = dataAnts[:,0]/4 # Scale down to 1000m step
-  #nants = dataAnts[:,1]
-  #ntrigs = dataAnts[:,2]
-  #
-  #print stats.describe(ncones)
-  #print stats.describe(nants)
-  #print stats.describe(ntrigs)
-  #plt.figure(24)
-  #plt.subplot(311)
-  #plt.hist(numpy.log10(ncones[ncones>0]),100)
+  print "Trigged events stats: [N,minAnts,maxAnts,<Ants>]",len(ntrigs[ntrigs>0]),numpy.min(ntrigs[ntrigs>0]),numpy.max(ntrigs[ntrigs>0]),numpy.mean(ntrigs[ntrigs>0])
+  print "Trigged events stats (events with 5+ ants): [N,minAnts,maxAnts,<Ants>]",len(ntrigs[ntrigs>4]),numpy.min(ntrigs[ntrigs>4]),numpy.max(ntrigs[ntrigs>4]),numpy.mean(ntrigs[ntrigs>4])
+    
+  plt.subplot(414)
+  plt.hist(numpy.log10(nclust[nclust>0]),100)
   #plt.xlim(0.1,max(numpy.log10(ncones)))
-  #plt.xlabel(r"$log_{10}(N_{Cone}^*$)")
-  #plt.title('$N_{ants}$ in events (all)')
-  #plt.subplot(312)
-  #plt.hist(numpy.log10(nants[nants>0]),100)
-  #plt.xlim(0.1,max(numpy.log10(ncones)))
-  #plt.xlabel(r"$log_{10}(N_{RadioSim})$")
-  #plt.subplot(313)
-  #plt.hist(numpy.log10(ntrigs[ntrigs>0]),100)
-  #plt.xlim(0.1,max(numpy.log10(ncones)))
-  #plt.xlabel(r"$log_{10}(N_{Trig})$")
-  
-  #plt.figure(37)
-  #plt.subplot(211)
-  #plt.hist(alpha,100)
-  #plt.subplot(212)
-  #plt.hist(beta,100)
-  
+  plt.xlabel(r"$log_{10}(N_{Clust})$")
+  print "Clustered events stats: [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>0]),numpy.min(nclust[nclust>0]),numpy.max(nclust[nclust>0]),numpy.mean(nclust[nclust>0])
+  print "Clustered events stats (events with 5+ ants): [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>4]),numpy.min(nclust[nclust>4]),numpy.max(nclust[nclust>4]),numpy.mean(nclust[nclust>4])
+
   # Print the total rate  
   mu = sum(data[:,0]) / n 
   sigma = sum(data[:,0]**2) / n

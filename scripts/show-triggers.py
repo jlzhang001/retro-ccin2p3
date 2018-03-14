@@ -21,7 +21,9 @@ topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",
                   stack_size=49)
 
 # Load the trigger map
-with open("share/HS1_cone500.triggers.p", "rb") as f:
+file="/home/martineau/GRAND/GRAND/data/massProd/HS1/jsons.triggers.p"
+file="share/HS1flat_sel500.triggers.p"
+with open(file, "rb") as f:
     n, latitude, longitude, rate = pickle.load(f)
 
 # Compute the topography
@@ -39,7 +41,7 @@ except:
 
 plt.figure()
 norme = colors.Normalize(vmin=0,vmax=numpy.max(h))
-plt.contour(longitude, latitude, h, 30, cmap="terrain",norm=norme)
+plt.contour(longitude, latitude, h, 10, cmap="terrain",norm=norme)
 plt.pcolor(longitude, latitude, rate, cmap="nipy_spectral", alpha=0.5)
 plt.colorbar()
 plt.xlabel(r"longitude (deg)")

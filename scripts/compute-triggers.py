@@ -12,13 +12,14 @@ import matplotlib.colors as colors
 from retro.event import EventIterator
 from grand_tour import Topography
 from common import checkTrig
+from common import checkCluster
 
 
 # Get the global topography handle
 topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",stack_size=49)
 
 DISPLAY = 1
-step = 500
+step = 500.
 plt.style.use("../retro/plugins/display/deps/mplstyle-l3/style/l3.mplstyle")
 
 def primary_flux(e):
@@ -40,7 +41,8 @@ def add_triggers(event, latitude, longitude, rate, opt='sel'):
     n = event["statistics"][0]
 
     if opt=='sel':
-        [bTrig,antsIDs] = checkTrig(event) 
+        _,antsIDs = checkTrig(event) 
+	bTrig, _ = checkCluster(event,antsIDs,'a')
     else:
         bTrig = True
 	x = np.array(event["antennas"])[:,0]

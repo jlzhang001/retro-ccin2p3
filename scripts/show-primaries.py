@@ -10,7 +10,7 @@ import cPickle as pickle
 import numpy
 import matplotlib.pyplot as plt
 
-plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
+#plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
 
 def primary_flux(e):
@@ -70,12 +70,13 @@ def getRate(pfile):
 
     return n, data
 
-files = ["share/HS1_cone500.primaries.p","share/HS1_sel500.primaries.p.5ants.3s","share/HS1_sel500.primaries.p.8ants.10s","share/HS1_sel1000.primaries.p.5ants.3s","share/HS1_sel1000.primaries.p.8ants.10s","share/HS1_sel1500.primaries.p.5ants.3s","share/HS1_sel1500.primaries.p.8ants.10s"]
-#files = ["share/jsons.primaries_sel.p"]
+#files = ["share/HS1_cone500.primaries.p","share/HS1_sel500.primaries.p.5ants.3s","share/HS1_sel500.primaries.p.8ants.10s","share/HS1_sel1000.primaries.p.5ants.3s","share/HS1_sel1000.primaries.p.8ants.10s","share/HS1_sel1500.primaries.p.5ants.3s","share/HS1_sel1500.primaries.p.8ants.10s"]
+#files = ["share/HS1_sel1000.primaries.p.5ants.3s","share/HS1flat.primaries_sel.p"]
+files = ["share/HS1_sel1000.primaries.p.5ants.3s","share/HS1flat_sel1000.primaries.p.5ants.3s","share/flat_sel1000.primaries.p.5ants.3s"]
 col = ["k","r","b","r","b","r","b"]
 lin = ["-",":",":","-","-","--","--"]
-
-leg = ['Cone','Agr. 500m','Cons. 500m','Agr. 1000m','Cons. 1000m','Agr. 1500m','Cons. 1500m']
+leg = ['Orig.','FlatAnt','FlatArray']
+#leg = ['Cone','Agr. 500m','Cons. 500m','Agr. 1000m','Cons. 1000m','Agr. 1500m','Cons. 1500m']
 yv = numpy.zeros([len(files),50])
 for i in range(len(files)):
     print "Loading",files[i]
@@ -96,56 +97,57 @@ plt.figure(1)
 plt.legend(loc='best')
 plt.savefig("primaries-rate.png")
 plt.figure(2)
+
 plt.loglog(xi,exppreai,'r-.',lw=3,label="Agr. (prelim)")
 plt.loglog(xi,exppreci,'g-.',lw=3,label="Cons. (prelim)")
 plt.legend(loc='best')
 plt.savefig("exposure.png")
 
-ra500 = yv[1,:]/yv[3,:]  # 500/1000
-ra1500 = yv[5,:]/yv[3,:]  # 1500/1000
-rc500 = yv[2,:]/yv[4,:]  # 500/1000
-rc1500 = yv[6,:]/yv[4,:]  # 1500/1000
-rac= yv[4,:]/yv[3,:]  # Conservative to Agressive
-rpa = exppreai/yv[3,:]  # Agressive prel to Agressive now
-rca = exppreci/yv[4,:]  # Conservative prel to Conservative now
+#ra500 = yv[1,:]/yv[3,:]  # 500/1000
+#ra1500 = yv[5,:]/yv[3,:]  # 1500/1000
+#rc500 = yv[2,:]/yv[4,:]  # 500/1000
+#rc1500 = yv[6,:]/yv[4,:]  # 1500/1000
+#rac= yv[4,:]/yv[3,:]  # Conservative to Agressive
+#rpa = exppreai/yv[3,:]  # Agressive prel to Agressive now
+#rca = exppreci/yv[4,:]  # Conservative prel to Conservative now
 
-plt.figure(21)
-plt.loglog(xi, yv[3,:], color="r",lw=4,label='Agr. (1000m) ')
-plt.loglog(xi, yv[4,:], color="b",lw=4,label='Cons. (1000m)')
-plt.loglog(xi,exppreai,'r-.',lw=3,label="Prelim agr. (800m)")
-plt.loglog(xi,exppreci,'b-.',lw=3,label="Prelim cons. (800m)")
-plt.legend(loc='best')
-plt.xlabel(r"energy, E$_\nu$ (GeV)")
-plt.ylabel(r"exposure, 1 year (cm$^2$ s sr)")
-plt.axis((1E+08, 1E+12, 1E+14, 1E+18))
-plt.grid(True)
+#plt.figure(21)
+#plt.loglog(xi, yv[3,:], color="r",lw=4,label='Agr. (1000m) ')
+#plt.loglog(xi, yv[4,:], color="b",lw=4,label='Cons. (1000m)')
+#plt.loglog(xi,exppreai,'r-.',lw=3,label="Prelim agr. (800m)")
+#plt.loglog(xi,exppreci,'b-.',lw=3,label="Prelim cons. (800m)")
+#plt.legend(loc='best')
+#plt.xlabel(r"energy, E$_\nu$ (GeV)")
+#plt.ylabel(r"exposure, 1 year (cm$^2$ s sr)")
+#plt.axis((1E+08, 1E+12, 1E+14, 1E+18))
+#plt.grid(True)
     
-plt.figure(3)
-plt.semilogx(xi,ra500,':r',lw=3,label='500m/1000m (Agr.)')
-plt.semilogx(xi,ra1500,'--r',lw=3,label='1500m/1000m (Agr.)')
-plt.semilogx(xi,rc500,':b',lw=3,label='500m/1000m (Cons.)')
-plt.semilogx(xi,rc1500,'--b',lw=3,label='1500m/1000m (Cons.)')
-plt.grid(True)
-plt.legend(loc='best')
-plt.axis((1E+08, 1E+12, 0, 4))
-plt.xlabel(r"energy, E$_\nu$ (GeV)")
-plt.ylabel(r"Exposure ratio")
+#plt.figure(3)
+#plt.semilogx(xi,ra500,':r',lw=3,label='500m/1000m (Agr.)')
+#plt.semilogx(xi,ra1500,'--r',lw=3,label='1500m/1000m (Agr.)')
+#plt.semilogx(xi,rc500,':b',lw=3,label='500m/1000m (Cons.)')
+#plt.semilogx(xi,rc1500,'--b',lw=3,label='1500m/1000m (Cons.)')
+#plt.grid(True)
+#plt.legend(loc='best')
+#plt.axis((1E+08, 1E+12, 0, 4))
+#plt.xlabel(r"energy, E$_\nu$ (GeV)")
+#plt.ylabel(r"Exposure ratio")
 
-plt.figure(31)
-plt.semilogx(xi,rac,'k-',lw=3)
-plt.grid(True)
-plt.axis((1E+08, 1E+12, 0, 1))
-plt.xlabel(r"energy, E$_\nu$ (GeV)")
-plt.ylabel(r"Exposure ratio Cons./Agr.")
+#plt.figure(31)
+#plt.semilogx(xi,rac,'k-',lw=3)
+#plt.grid(True)
+#plt.axis((1E+08, 1E+12, 0, 1))
+#plt.xlabel(r"energy, E$_\nu$ (GeV)")
+#plt.ylabel(r"Exposure ratio Cons./Agr.")
 
-plt.figure(32)
-plt.semilogx(xi,rpa,'r-',lw=3,label='Prelim agr./Agr.')
-plt.semilogx(xi,rca,'b-',lw=3,label='Prelim cons./Cons')
-plt.grid(True)
-plt.legend(loc='best')
-plt.axis((1E+08, 1E+12, 0, 4))
-plt.xlabel(r"energy, E$_\nu$ (GeV)")
-plt.ylabel(r"Exposure ratio")
+#plt.figure(32)
+#plt.semilogx(xi,rpa,'r-',lw=3,label='Prelim agr./Agr.')
+#plt.semilogx(xi,rca,'b-',lw=3,label='Prelim cons./Cons')
+#plt.grid(True)
+#plt.legend(loc='best')
+#plt.axis((1E+08, 1E+12, 0, 4))
+#plt.xlabel(r"energy, E$_\nu$ (GeV)")
+#plt.ylabel(r"Exposure ratio")
     
 plt.show()
 

@@ -22,11 +22,24 @@ def checkCluster(event, antIDs,mod='a'):
     zants = ants[antIDs,2]
     posAnts = np.array([xants, yants, zants])
     nAnts = len(xants)
-    d = 1e12*np.ones((nAnts,nAnts))
+    # TOBEDONE
+    #for i in range(nAnts):
+    #  v = np.tile(posAnts[:,i], (nAnts,1))
+    #  v = np.transpose(v)
+    #  d = np.linalg.norm(v-posAnts,axis=0)
+    #  #ds = np.ndarray.sort(d)
+    #  
+    #  print d
+    #  pl.figure(12)
+    #  pl.plot(d)
+    #  pl.show()
+    
+    # TO BE REPLACED (see computeCluster.m)   
+    d = 1e12*np.ones(shape=(nAnts,nAnts))
     for i in range(nAnts):
       for j in range(i+1,nAnts):
          d[i,j]=np.linalg.norm(posAnts[:,i]-posAnts[:,j])
-	 
+    		 
     minDist= np.ndarray.min(d,axis=1)
     bCluster = minDist<step*2  # Clustered antennas if closer than twice step size
     ntrigs = np.sum(bCluster)  # Nb of antennas trigged in this event
@@ -49,12 +62,14 @@ def checkTrig(event,mod='a'):
     th = v*noise  #2xrms is peak-peak noise level
     bAntIn = setStep(event,step)  # is it a "true" antenna pos? (ie sim with 500m step)
     antIDs = np.where(bAntIn)[0]  # Antenna ID
+    #print "len(antIDs):",len(antIDs)
     bTrig = False
     try:
       v = np.array(event["voltage"])
     except:
       #print "No voltage!"
       return False,[]
+    #print "len(v)",len(v)  
     antsin = []
     Ampx=[]
     Ampy=[]
@@ -69,6 +84,7 @@ def checkTrig(event,mod='a'):
         Ampz.append(float(v[i,3]))  # Vert arm
     
     antsin = np.array(antsin)
+    #print "len(antsin)",len(antsin)
     Ampx = np.array(Ampx)
     Ampy = np.array(Ampy)
     Ampz = np.array(Ampz)
@@ -100,6 +116,6 @@ def setStep(event,step):
     #pl.scatter(xants,yants,marker='+')
     #pl.scatter(xants[ain],yants[ain],marker='o',color='g')
     #pl.show()
-    
+    #print "len(ain):",len(ain)
     return ain
     
