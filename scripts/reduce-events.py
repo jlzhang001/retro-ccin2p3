@@ -64,8 +64,8 @@ def summarise_tau(event,opt='sel'):
 	posDecayTile = np.transpose(np.tile(np.array([x, y, z]),(nl,1)))  # matrix of decay pos
 	dist = np.linalg.norm(posCluster-posDecayTile,axis=0)
 	dmin,dmax = np.min(dist)/1e3,np.max(dist)/1e3
-	if dmin>90:
-	  print dmin,"km for shower",event["tag"]
+	if dmax>90:
+	  print dmin,dmax,"km for shower",event["tag"]
         data = [w, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl,dmin,dmax]
     else:
         data = [0, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl,0,0]

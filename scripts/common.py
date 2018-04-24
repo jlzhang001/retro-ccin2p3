@@ -54,7 +54,7 @@ def checkCluster(event, antIDs,mod='a'):
 def checkTrig(event,mod='a'):
     """Determines if event trigs array. Returns list of trigged antennas.""" 
     if mod  == 'a': # Agressive threshold
-    	v = 3   # 3 sigmas
+    	v = 3   # 6 sigmas
 	ntrigthresh=5
     if mod  == 'c': # Conservative threshold
     	v = 10

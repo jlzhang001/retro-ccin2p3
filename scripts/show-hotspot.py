@@ -135,8 +135,8 @@ col = ["k","r","g"]
 #files = ["share/HS1_sel1000.p.5ants.3s"]
 #files = ["share/HS1_sel1000.p.5ants.3s","share/HS1flat_sel1000.p.5ants.3s"]
 #files = ["share/flat_sel1000.p.5ants.3s"]
-
-files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1_sel.p"]
+files = ["share/HS1vertfix_sel1000.p.5ants.3s"]
+#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1_sel.p"]
 #files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1flat/HS1flat_sel.p"]
 for i in range(len(files)):
 # Load the reduced events

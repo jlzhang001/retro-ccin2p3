@@ -73,9 +73,10 @@ def getRate(pfile):
 #files = ["share/HS1_cone500.primaries.p","share/HS1_sel500.primaries.p.5ants.3s","share/HS1_sel500.primaries.p.8ants.10s","share/HS1_sel1000.primaries.p.5ants.3s","share/HS1_sel1000.primaries.p.8ants.10s","share/HS1_sel1500.primaries.p.5ants.3s","share/HS1_sel1500.primaries.p.8ants.10s"]
 #files = ["share/HS1_sel1000.primaries.p.5ants.3s","share/HS1flat.primaries_sel.p"]
 files = ["share/HS1_sel1000.primaries.p.5ants.3s","share/HS1flat_sel1000.primaries.p.5ants.3s","share/flat_sel1000.primaries.p.5ants.3s"]
+files = ["share/HS1_sel1000.primaries.p.5ants.3s","share/HS1fix_sel1000.primaries.p.5ants.3s","share/HS1fix_sel1000.primaries.p.5ants.6s","share/HS1vertfix_sel1000.primaries.p.5ants.6s"]
 col = ["k","r","b","r","b","r","b"]
-lin = ["-",":",":","-","-","--","--"]
-leg = ['Orig.','FlatAnt','FlatArray']
+lin = ["-","-","-","-","-","--","--"]
+leg = ['Orig.+3$\sigma$','Fix+3$\sigma$','Fix+6$\sigma$','VertFix+6$\sigma$']
 #leg = ['Cone','Agr. 500m','Cons. 500m','Agr. 1000m','Cons. 1000m','Agr. 1500m','Cons. 1500m']
 yv = numpy.zeros([len(files),50])
 for i in range(len(files)):
