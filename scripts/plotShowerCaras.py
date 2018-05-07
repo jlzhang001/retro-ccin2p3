@@ -14,9 +14,11 @@ import scipy.interpolate as itp
 import matplotlib.colors as colors
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
-
-from common import checkTrig
+RETRODIR = "/home/martineau/GRAND/soft/neutrinos/retro/"
+sys.path.append(RETRODIR)
+sys.path.append(RETRODIR+"lib/python/")
 from retro.event import EventIterator, EventLogger
+from common import checkTrig
 sys.path.append("/home/martineau/GRAND/soft/neutrinos/simulations")
 from modules import TopoToAntenna
 
@@ -103,12 +105,12 @@ if __name__ == "__main__":
     	shower_energy += sum(m**2 for m in momentum)**0.5
      shower_energy = shower_energy/1e9	
      print shower_energy
-     if shower_energy>1:
-       print 'Skip E'
-       continue	
-     if zen>89:
-       print 'Skip Zen'
-       continue
+     #if shower_energy>1:
+     #  print 'Skip E'
+     #  continue	
+     #if zen>89:
+     #  print 'Skip Zen'
+     #  continue
      az = tau_dir[1]
      print  "Decay at position",decay_pos,"in direction (theta,phi)=",tau_dir
      cz = np.cos(zen*np.pi/180)
@@ -152,7 +154,8 @@ if __name__ == "__main__":
  
      # Voltage/Trigger infos
      [bTrig,antsIDs] = checkTrig(evt)
-     if bTrig:
+     #if bTrig:
+     if 1:
  	 antsin = []
  	 Ampx=[]
  	 Ampy=[]
@@ -167,12 +170,16 @@ if __name__ == "__main__":
  	   Ampz.append(float(v[i,3]))  # Vert arm
  	   Ampxy.append(float(v[i,4]))  # EW arm
 
- 	 #antsin = np.array(antsin[antsInd])
- 	 bin = np.in1d(antsin,antsIDs)
+ 	 if len(antsIDs)>0:
+	   #antsin = np.array(antsin[antsInd])
+ 	   bin = np.in1d(antsin,antsIDs)
+	 else:
+	   bin = np.arange(len(antsin))
  	 Ampx = np.array(Ampx)[bin]
  	 Ampy = np.array(Ampy)[bin]
  	 Ampz = np.array(Ampz)[bin]
  	 Ampxy = np.array(Ampxy)[bin]
+	   
      else:
  	 print "Shower not triggered."
  	 continue
@@ -183,9 +190,15 @@ if __name__ == "__main__":
      xantsr = xants[antsin]
      yantsr = yants[antsin]
      zantsr = zants[antsin]
-     xants = xants[antsIDs]
-     yants = yants[antsIDs]
-     zants = zants[antsIDs]
+     if len(antsIDs)>0:
+       xants = xants[antsIDs]
+       yants = yants[antsIDs]
+       zants = zants[antsIDs]
+     else:
+       xants = xantsr
+       yants = yantsr
+       zants = zantsr
+       
      posAnts = np.array([xants,yants,zants])
  
      pl.figure(222)
@@ -221,24 +234,25 @@ if __name__ == "__main__":
  
      # Antenna array 3D-plots (to check geometry)
  
-     fig = pl.figure(1)
-     ax = fig.add_subplot(111, projection='3d')
-     slop = alpha
-     norm = colors.Normalize(vmin=slop.min(),vmax=slop.max())
-     ax.scatter(xants/1e3, yants/1e3, zants,c=slop, marker='o',cmap='jet',s=100,norm=norm)
-     ax.scatter(decay_pos[0]/1e3, decay_pos[1]/1e3, decay_pos[2], c='r', marker='h',s=100)
-     ax.plot([decay_pos[0]/1e3, vend[0]/1e3],[decay_pos[1]/1e3, vend[1]/1e3], [decay_pos[2], vend[2]],'r')
-     pl.xlabel('SN (km)')
-     pl.ylabel('EW (km)')
-     ax.set_zlabel('Alt (m)')
-     m = cm.ScalarMappable(cmap=cm.jet,norm=norm)
-     m.set_array(slop)
-     pl.colorbar(m)
-     #pl.zlabel('Alt (m)')
+     if len(alpha)>0:
+       fig = pl.figure(1)
+       ax = fig.add_subplot(111, projection='3d')
+       slop = alpha
+       norm = colors.Normalize(vmin=slop.min(),vmax=slop.max())
+       ax.scatter(xants/1e3, yants/1e3, zants,c=slop, marker='o',cmap='jet',s=100,norm=norm)
+       ax.scatter(decay_pos[0]/1e3, decay_pos[1]/1e3, decay_pos[2], c='r', marker='h',s=100)
+       ax.plot([decay_pos[0]/1e3, vend[0]/1e3],[decay_pos[1]/1e3, vend[1]/1e3], [decay_pos[2], vend[2]],'r')
+       pl.xlabel('SN (km)')
+       pl.ylabel('EW (km)')
+       ax.set_zlabel('Alt (m)')
+       m = cm.ScalarMappable(cmap=cm.jet,norm=norm)
+       m.set_array(slop)
+       pl.colorbar(m)
+       #pl.zlabel('Alt (m)')
  
      # Amplitude patterns @ ground
      amp2DPattern(Ampx,'Vx (NS)')
-     #amp2DPattern(Ampy,'Vy (EW)')
+     amp2DPattern(Ampy,'Vy (EW)')
      #amp2DPattern(Ampz,'Vz (Vert)')
      #amp2DPattern(Ampxy,'Vx+Vy')
 
@@ -252,17 +266,17 @@ if __name__ == "__main__":
      #doScatterCol(theta_ant,phi_ant,Ampx,xlab='$\Theta_{ant}$ (deg)',ylab='$\phi_{ant}$ (deg)',clab='AmpSN ($\mu V$)')
      #doScatterCol(phi_ant,angSh,Ampx,xlab='$\phi_{ant}$ (deg)',ylab='Angle to axis (deg)',clab='AmpSN ($\mu V$)')
  
-     doScatterPlot(alpha,Ampx,xlab='Slope (deg)',ylab='AmpSN ($\mu V$)')
+     #doScatterPlot(alpha,Ampx,xlab='Slope (deg)',ylab='AmpSN ($\mu V$)')
  
      #fig = pl.figure(70)
      #pl.hist(Ampx/Ampy,50)
      #pl.xlabel('AmpSN/AmpEW')
      #doScatterPlot(phi_ant,Ampx/Ampy,xlab='$\phi_{ant}$ (deg)',ylab='AmpSN/AmpEW')
  
-     #pl.figure()
-     #alphat = alpha*np.sign(np.cos(beta))
-     #pl.hist(alphat,100)
-     #pl.xlabel('Alpha (deg)')
+     pl.figure()
+     alphat = alpha*np.sign(np.cos(beta))
+     pl.hist(alphat,100)
+     pl.xlabel('Alpha (deg)')
      
      pl.show()
      raw_input()

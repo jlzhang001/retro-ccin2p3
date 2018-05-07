@@ -8,6 +8,7 @@ from retro.event import EventIterator
 from common import checkTrig
 from common import checkCluster
 from common import setStep
+from common import checkCone
 
 #sys.path.append("../retro/lib/python/retro/")
 
@@ -18,19 +19,19 @@ def primary_flux(e):
 
 
 def summarise_primaries(event,opt='sel'):
-    """Extract the relevant neutrino info from an event"""
+    #print """**** Extract the relevant neutrino info from an event"""
     
     year = 365.25 * 24. * 60. * 60.
     nrm = year / event["statistics"][1]
     
     n = event["statistics"][0]
     data = None
-        
     if opt == 'sel':
-    	_,antsIDs = checkTrig(event,'a') 
-	bTrig, bCluster = checkCluster(event,antsIDs,'a')
-    else:
-        bTrig = True
+    	antsIDs = checkTrig(event) 
+    else:  # Cone selection
+        antsIDs = checkCone(event)
+    bTrig, bCluster = checkCluster(event,antsIDs)
+	
     if bTrig:  # Shower was detected!
     	v2 = event["primaries"]
 	data = []
@@ -53,7 +54,7 @@ def process(path,summarise,opt='sel'):
         t0 = time.time()
         #print "o Processing", filename
         for event in EventIterator(filename):
-            n, d = summarise_primaries(event,opt='sel')
+            n, d = summarise_primaries(event,opt)
 	    generated += n
             if d is not None:
                 data += d
@@ -61,6 +62,7 @@ def process(path,summarise,opt='sel'):
 	if float(nf)/100 == np.floor(nf/100):
 		print 'Nb of json files processed:',nf
 	#if nf==1000:
+	#  print "#### Warning! Stopping at",nf
 	#  break
 
     if len(data) == 0:
@@ -80,7 +82,7 @@ def process(path,summarise,opt='sel'):
 
 
 if __name__ == "__main__":
-    print "Usage: >python reduce-primaries.py <path to json file> [<sel/whatever>]"
+    print "Usage: >python reduce-primaries.py <path to json file> [<sel/cone>]"
     print "sel: includes antenna response (default)"
     if len(sys.argv)==3:
         process(sys.argv[1],summarise_primaries,sys.argv[2])

@@ -92,6 +92,7 @@ def doPlots(n, data,col="k"):
   plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
   plt.savefig("tau-height.png")
   
+  
 
 def doTopoPlot(data):
   rate, xe, ye = histogram2d(data[:, 6], data[:, 5], 100,
@@ -135,7 +136,8 @@ col = ["k","r","g"]
 #files = ["share/HS1_sel1000.p.5ants.3s"]
 #files = ["share/HS1_sel1000.p.5ants.3s","share/HS1flat_sel1000.p.5ants.3s"]
 #files = ["share/flat_sel1000.p.5ants.3s"]
-files = ["share/HS1vertfix_sel1000.p.5ants.3s"]
+files = ["share/HS1freespace.p.5ants.5s.noAtt","share/HS1ground.p.5ants.5s","share/HS1freespace.p.5ants.3s.noAtt","share/HS1freespace.p.5ants.3s"]
+#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1freespace_sel.p","/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1ground_sel.p"]
 #files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1_sel.p"]
 #files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1flat/HS1flat_sel.p"]
 for i in range(len(files)):
@@ -198,18 +200,29 @@ for i in range(len(files)):
   #plt.xlim(0.1,max(numpy.log10(ncones)))
   plt.xlabel(r"$log_{10}(N_{Clust})$")
   print "Clustered events stats: [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>0]),numpy.min(nclust[nclust>0]),numpy.max(nclust[nclust>0]),numpy.mean(nclust[nclust>0])
-  print "Clustered events stats (events with 5+ ants): [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>4]),numpy.min(nclust[nclust>4]),numpy.max(nclust[nclust>4]),numpy.mean(nclust[nclust>4])
+  print "Clustered events stats (events with 4+ ants): [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>3]),numpy.min(nclust[nclust>3]),numpy.max(nclust[nclust>3]),numpy.mean(nclust[nclust>3])
 
   # Print the total rate  
+  print n,sum(data[:,0]>0),sum(data[:,0])
   mu = sum(data[:,0]) / n 
   sigma = sum(data[:,0]**2) / n
   sigma = numpy.sqrt((sigma - mu**2) / n)
   print "Rate = {:.3f} +-{:.3f} yr^-1".format(mu, sigma)
   doPlots(n,data,col[i])
-  doTopoPlot(data)
+  #doTopoPlot(data)
 
+  plt.figure()
+  w = data[:,0]
+  if i==0:
+    wfree = w
+  if i==1:
+    wground = w
+  plt.hist(w,100)
+  print len(w[w>0]),numpy.mean(w[w>0]),numpy.median(w[w>0])
+  
+isnotflat = numpy.setdiff1d(wground,wfree)
+numpy.savetxt('isnotinfree.txt', isnotflat)
+print len(numpy.intersect1d(wfree,wground)),len(numpy.setdiff1d(wfree,wground)),len(numpy.setdiff1d(wground,wfree))
 plt.show()
-
-
  
 

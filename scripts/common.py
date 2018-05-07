@@ -1,65 +1,84 @@
+import sys
 import numpy as np
 import pylab as pl
+RETRODIR = "/home/martineau/GRAND/soft/neutrinos/retro/"
+sys.path.append(RETRODIR)
+sys.path.append(RETRODIR+"lib/python/")
 from retro.event import EventIterator
 
 noise = 15. #muV (minimal rms noise level on HorizonAntenna in 50-200MHz)
 step = 1000.
+DISPLAY = 0
 
-def checkCluster(event, antIDs,mod='a'):
-    """Check if antennas cluster.""" 
     
+def checkCluster(event,antIDs,nantsmin=3):
+    #print """checkCluster: check if antennas cluster.""" 
     if len(antIDs)==0:  # Empty array
+      #print "Less than min ants nb above threshold."
+      if DISPLAY:
+        pl.close("all")
       return False, []
       
-    if mod == 'a':
-        ntrigthresh=5
-    if mod == 'c':
-        ntrigthresh=8
     bTrig = False
     ants = np.array(event["antennas"])
     xants = np.array(ants[antIDs,0])
     yants = ants[antIDs,1]
     zants = ants[antIDs,2]
     posAnts = np.array([xants, yants, zants])
-    nAnts = len(xants)
-    # TOBEDONE
-    #for i in range(nAnts):
-    #  v = np.tile(posAnts[:,i], (nAnts,1))
-    #  v = np.transpose(v)
-    #  d = np.linalg.norm(v-posAnts,axis=0)
-    #  #ds = np.ndarray.sort(d)
-    #  
-    #  print d
-    #  pl.figure(12)
-    #  pl.plot(d)
-    #  pl.show()
-    
-    # TO BE REPLACED (see computeCluster.m)   
+    nAnts = len(xants)  
+    if nAnts<= nantsmin:
+        return False, []
     d = 1e12*np.ones(shape=(nAnts,nAnts))
     for i in range(nAnts):
-      for j in range(i+1,nAnts):
+      for j in range(nAnts):
          d[i,j]=np.linalg.norm(posAnts[:,i]-posAnts[:,j])
-    		 
-    minDist= np.ndarray.min(d,axis=1)
-    bCluster = minDist<step*2  # Clustered antennas if closer than twice step size
-    ntrigs = np.sum(bCluster)  # Nb of antennas trigged in this event
-    if ntrigs>=ntrigthresh:
+    
+    a = np.sort(d)
+    d3rdneighbourg = a[:,nantsmin]	#  Distance of 3rd closest trigged antenna
+    bCluster= d3rdneighbourg<2*step  # Antennas with 3rd neighbourgh within 2 steps
+    if np.sum(bCluster)>0: # At least one
     	bTrig = True;
 	
+    if DISPLAY:
+      print a[:,0:4]
+      print bCluster
+      print bTrig
+      pl.figure(1)
+      pl.scatter(xants[bCluster],yants[bCluster],marker='o',color='g')
+      pl.show()
+      raw_input()
+      pl.close("all")
+      
     return bTrig,bCluster
-    #pl.figure(1)
-    #pl.scatter(xants,yants)
-    #pl.show()
 
-def checkTrig(event,mod='a'):
-    """Determines if event trigs array. Returns list of trigged antennas.""" 
-    if mod  == 'a': # Agressive threshold
-    	v = 3   # 6 sigmas
-	ntrigthresh=5
-    if mod  == 'c': # Conservative threshold
-    	v = 10
-	ntrigthresh=8
-    th = v*noise  #2xrms is peak-peak noise level
+def checkCone(event):
+    ants = np.array(event["antennas"])
+    bAntIn = setStep(event,step)  # is it a "true" antenna pos? (ie sim with 500m step)
+    antIDs = np.where(bAntIn)[0]  # Antenna ID
+    xants = np.array(ants[antIDs,0])
+    yants = ants[antIDs,1]
+    zants = ants[antIDs,2]
+    posAnts = np.array([xants, yants, zants])
+    posAnts = np.transpose(posAnts)
+    nAnts = len(xants)  
+    
+    _, e, (x0, y0, z0), u, (la, lo, h), (t, p) = event["tau_at_decay"]
+    posDecay = [x0,y0,z0]
+    d = np.linalg.norm(posAnts-posDecay,axis=1)
+    tAntsID = antIDs[np.where(d<90000)[0]]
+    
+    if DISPLAY:
+      ants = np.array(event["antennas"])
+      xants = np.array(ants[:,0])
+      yants = ants[:,1]
+      pl.figure(1)
+      pl.scatter(xants[tAntsID],yants[tAntsID],marker='o',color='b')
+    
+    return tAntsID
+   
+def checkTrig(event,thresh=5):
+    #print """checkTrig: determines if event trigs array. Returns list of trigged antennas.""" 
+    th = thresh*noise  #
     bAntIn = setStep(event,step)  # is it a "true" antenna pos? (ie sim with 500m step)
     antIDs = np.where(bAntIn)[0]  # Antenna ID
     #print "len(antIDs):",len(antIDs)
@@ -82,7 +101,7 @@ def checkTrig(event,mod='a'):
         Ampy.append(float(v[i,2]))  # EW arm
         Ampxy.append(float(v[i,4]))  # EW arm
         Ampz.append(float(v[i,3]))  # Vert arm
-    
+
     antsin = np.array(antsin)
     #print "len(antsin)",len(antsin)
     Ampx = np.array(Ampx)
@@ -93,9 +112,15 @@ def checkTrig(event,mod='a'):
     iTrig = trigMat.sum(axis=0)>0 # Vector of antenna trigger flags (Warning: <=>index of "voltage" field)
     tAntsID =  antsin[iTrig]  # ID of trigged antennas   
     ntrigs = np.sum(iTrig)  # Nb of antennas trigged in this event
-    if ntrigs>=ntrigthresh:
-    	bTrig = True;
-    return bTrig,tAntsID
+    
+    if DISPLAY:
+      ants = np.array(event["antennas"])
+      xants = np.array(ants[:,0])
+      yants = ants[:,1]
+      pl.figure(1)
+      pl.scatter(xants[tAntsID],yants[tAntsID],marker='o',color='b')
+    
+    return tAntsID
 
 #
 def setStep(event,step):
@@ -111,11 +136,12 @@ def setStep(event,step):
     ysteps = np.floor(yants/500)
     yin = (ysteps % r == 0)
     ain = np.logical_and(xin,yin)
-        
-    #pl.figure(1)
-    #pl.scatter(xants,yants,marker='+')
-    #pl.scatter(xants[ain],yants[ain],marker='o',color='g')
-    #pl.show()
+    
+    if DISPLAY:    
+      pl.figure(1)
+      pl.scatter(xants,yants,marker='+',color='k')
+      pl.scatter(xants[ain],yants[ain],marker='o',color='r')
     #print "len(ain):",len(ain)
+    
     return ain
     

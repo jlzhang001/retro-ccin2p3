@@ -70,14 +70,11 @@ def getRate(pfile):
 
     return n, data
 
-#files = ["share/HS1_cone500.primaries.p","share/HS1_sel500.primaries.p.5ants.3s","share/HS1_sel500.primaries.p.8ants.10s","share/HS1_sel1000.primaries.p.5ants.3s","share/HS1_sel1000.primaries.p.8ants.10s","share/HS1_sel1500.primaries.p.5ants.3s","share/HS1_sel1500.primaries.p.8ants.10s"]
-#files = ["share/HS1_sel1000.primaries.p.5ants.3s","share/HS1flat.primaries_sel.p"]
-files = ["share/HS1_sel1000.primaries.p.5ants.3s","share/HS1flat_sel1000.primaries.p.5ants.3s","share/flat_sel1000.primaries.p.5ants.3s"]
-files = ["share/HS1_sel1000.primaries.p.5ants.3s","share/HS1fix_sel1000.primaries.p.5ants.3s","share/HS1fix_sel1000.primaries.p.5ants.6s","share/HS1vertfix_sel1000.primaries.p.5ants.6s"]
-col = ["k","r","b","r","b","r","b"]
-lin = ["-","-","-","-","-","--","--"]
-leg = ['Orig.+3$\sigma$','Fix+3$\sigma$','Fix+6$\sigma$','VertFix+6$\sigma$']
-#leg = ['Cone','Agr. 500m','Cons. 500m','Agr. 1000m','Cons. 1000m','Agr. 1500m','Cons. 1500m']
+#files = ["share/old/HS1_sel1000.primaries.p.5ants.3s","share/old/HS1_sel1000.primaries.p.8ants.10s",]
+files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1freespace/noatt.primaries.p","share/HS1ground.primaries.5ants.5s","share/HS1freespace.primaries.5ants.5s","share/HS1freespace.primaries.5ants.5s.noAtt","share/HS1ground.primaries.5ants.3s","share/HS1freespace.primaries.5ants.3s","share/HS1freespace.primaries.5ants.3s.noAtt"]
+col = ["k","r","b","g","r","b","g"]
+lin = ["-","-","-","-","--","--","--"]
+leg = ['Cone selection','Ground.+5$\sigma$','Free space + Att +5$\sigma$','Free space NoAtt +5$\sigma$','Ground.+3$\sigma$','Free space + Att +3$\sigma$','Free space NoAtt +3$\sigma$']
 yv = numpy.zeros([len(files),50])
 for i in range(len(files)):
     print "Loading",files[i]
@@ -88,7 +85,7 @@ for i in range(len(files)):
     
 eprel = 1e11*numpy.array([0.0010,0.0030,0.0100,0.0300,0.1000,0.3000,1.0000,3.0000])
 expprea = 1e17*numpy.array([0.0260,0.2619,0.9504,1.7266,2.5552,3.4848,4.5618,5.2054])
-expprec = 1e+17 *numpy.array([0,0.0769,0.5324,1.2734,2.0508,2.7981,4.1219,5.0788])
+expprec = 1e17 *numpy.array([0,0.0769,0.5324,1.2734,2.0508,2.7981,4.1219,5.0788])
 exppreai = numpy.interp(xi,eprel,expprea)
 exppreci = numpy.interp(xi,eprel,expprec)
 #exppreai = exppreai*10000/7500  # Scale from 7500 to 1000km2 
@@ -98,7 +95,6 @@ plt.figure(1)
 plt.legend(loc='best')
 plt.savefig("primaries-rate.png")
 plt.figure(2)
-
 plt.loglog(xi,exppreai,'r-.',lw=3,label="Agr. (prelim)")
 plt.loglog(xi,exppreci,'g-.',lw=3,label="Cons. (prelim)")
 plt.legend(loc='best')

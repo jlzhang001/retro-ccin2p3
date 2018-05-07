@@ -42,7 +42,8 @@ def summarise_tau(event,opt='sel'):
     alpha = ants[:,3]
     beta = ants[:,4]
     nc = np.shape(ants)[0]  # Number of antennas in cone
-
+    
+    targetw = np.loadtxt('isnotinfree.txt')
     if opt == 'sel':  # Trigger analysis
     	try:
     	  volts = np.array(event["voltage"])
@@ -51,25 +52,25 @@ def summarise_tau(event,opt='sel'):
     	  #print "No voltage for shower",event["tag"]
 	  return n, None
 
-    	_,antsIDs = checkTrig(event,'a')
+    	_,antsIDs = checkTrig(event)
     	nt = len(antsIDs)   # Nb of trigged antennas
-    	bTrig, bCluster = checkCluster(event,antsIDs,'a')
+    	bTrig, bCluster = checkCluster(event,antsIDs)
     	nl = sum(bCluster) # Nb of clustered antennas
     else:  # Only cone analysis
 	bTrig = True
 	nv, nt, nc = 1, 1, 1
 	
     if bTrig and w > 0.:  # This shower triggered
-	posCluster = [xants[antsIDs[bCluster]], yants[antsIDs[bCluster]],zants[antsIDs[bCluster]]]  # matrix of trigged antenna pos
+        posCluster = [xants[antsIDs[bCluster]], yants[antsIDs[bCluster]],zants[antsIDs[bCluster]]]  # matrix of trigged antenna pos
 	posDecayTile = np.transpose(np.tile(np.array([x, y, z]),(nl,1)))  # matrix of decay pos
 	dist = np.linalg.norm(posCluster-posDecayTile,axis=0)
 	dmin,dmax = np.min(dist)/1e3,np.max(dist)/1e3
-	if dmax>90:
-	  print dmin,dmax,"km for shower",event["tag"]
-        data = [w, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl,dmin,dmax]
+	mask = np.in1d(w,targetw)
+	if sum(mask)>0:
+	  print event["tag"],w
+        data = [w, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl, dmin, dmax]
     else:
-        data = [0, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl,0,0]
-	 	
+        data = [0, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, 0,0,0]
     return n, data
 
 
