@@ -76,7 +76,7 @@ def checkCone(event):
     
     return tAntsID
    
-def checkTrig(event,thresh=5):
+def checkTrig(event,thresh=3):
     #print """checkTrig: determines if event trigs array. Returns list of trigged antennas.""" 
     th = thresh*noise  #
     bAntIn = setStep(event,step)  # is it a "true" antenna pos? (ie sim with 500m step)

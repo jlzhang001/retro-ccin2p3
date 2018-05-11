@@ -43,7 +43,7 @@ def summarise_tau(event,opt='sel'):
     beta = ants[:,4]
     nc = np.shape(ants)[0]  # Number of antennas in cone
     
-    targetw = np.loadtxt('isnotinfree.txt')
+    targetw = np.loadtxt('isnotintarget.txt')
     if opt == 'sel':  # Trigger analysis
     	try:
     	  volts = np.array(event["voltage"])
@@ -51,14 +51,12 @@ def summarise_tau(event,opt='sel'):
     	except:
     	  #print "No voltage for shower",event["tag"]
 	  return n, None
-
-    	_,antsIDs = checkTrig(event)
-    	nt = len(antsIDs)   # Nb of trigged antennas
-    	bTrig, bCluster = checkCluster(event,antsIDs)
-    	nl = sum(bCluster) # Nb of clustered antennas
+    	antsIDs = checkTrig(event)
     else:  # Only cone analysis
-	bTrig = True
-	nv, nt, nc = 1, 1, 1
+	antsIDs = checkCone(event)
+    nt = len(antsIDs)   # Nb of trigged antennas
+    bTrig, bCluster = checkCluster(event,antsIDs)
+    nl = sum(bCluster) # Nb of clustered antennas
 	
     if bTrig and w > 0.:  # This shower triggered
         posCluster = [xants[antsIDs[bCluster]], yants[antsIDs[bCluster]],zants[antsIDs[bCluster]]]  # matrix of trigged antenna pos

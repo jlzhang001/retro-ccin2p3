@@ -153,7 +153,7 @@ if __name__ == "__main__":
      pl.ylabel('Alt (km)')
  
      # Voltage/Trigger infos
-     [bTrig,antsIDs] = checkTrig(evt)
+     antsIDs = checkTrig(evt)
      #if bTrig:
      if 1:
  	 antsin = []

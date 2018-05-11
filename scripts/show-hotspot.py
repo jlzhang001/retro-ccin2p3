@@ -136,10 +136,8 @@ col = ["k","r","g"]
 #files = ["share/HS1_sel1000.p.5ants.3s"]
 #files = ["share/HS1_sel1000.p.5ants.3s","share/HS1flat_sel1000.p.5ants.3s"]
 #files = ["share/flat_sel1000.p.5ants.3s"]
-files = ["share/HS1freespace.p.5ants.5s.noAtt","share/HS1ground.p.5ants.5s","share/HS1freespace.p.5ants.3s.noAtt","share/HS1freespace.p.5ants.3s"]
-#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1freespace_sel.p","/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1ground_sel.p"]
-#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1_sel.p"]
-#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1flat/HS1flat_sel.p"]
+#files = ["share/HS1freespace.p.5ants.5s.noAtt","share/HS1ground.p.5ants.5s","share/HS1freespace.p.5ants.3s.noAtt","share/HS1freespace.p.5ants.3s"]
+files = ["share/HS1freespace.p.5ants.3s.50200","share/HS1freespace.p.5ants.3s",]  " Ref/target
 for i in range(len(files)):
 # Load the reduced events
   print"Opening",files[i]
@@ -213,16 +211,16 @@ for i in range(len(files)):
 
   plt.figure()
   w = data[:,0]
-  if i==0:
-    wfree = w
+  if i==0:  
+    wref = w
   if i==1:
-    wground = w
+    wtarget = w
   plt.hist(w,100)
   print len(w[w>0]),numpy.mean(w[w>0]),numpy.median(w[w>0])
   
-isnotflat = numpy.setdiff1d(wground,wfree)
-numpy.savetxt('isnotinfree.txt', isnotflat)
-print len(numpy.intersect1d(wfree,wground)),len(numpy.setdiff1d(wfree,wground)),len(numpy.setdiff1d(wground,wfree))
+isnotintarget = numpy.setdiff1d(wref,wtarget)
+numpy.savetxt('isnotintarget.txt', isnotintarget)
+print len(numpy.intersect1d(wref,wtarget)),len(numpy.setdiff1d(wref,wtarget)),len(numpy.setdiff1d(wtarget,wref))
 plt.show()
  
 
