@@ -9,7 +9,7 @@ import cPickle as pickle
 
 import numpy
 import matplotlib.pyplot as plt
-DISPLAY=1
+DISPLAY=2
 dur = 3 # years
 #plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
@@ -80,12 +80,12 @@ if DISPLAY==1:  # Comparison to initial study
   lin = ["-","--","-"]
   leg = ['Free space+Att+3$\sigma$','Free space+Att+Filt+3$\sigma$','Free space+Att_v2+Filt+3$\sigma$']
 if DISPLAY ==2:  # Free space vs ground
-  files = ["share/HS1freespace.primaries.5ants.5s","share/HS1freespace.primaries.5ants.5s.noAtt","share/HS1ground.primaries.5ants.5s"]
+  files = ["share/HS1freespace.primaries.5ants.3s.50200","share/HS1freespace.primaries.5ants.3s.noAtt.50200","share/HS1ground.primaries.5ants.3s"]
   col = ["k","k"]
   lin = ["-","--"]
   leg = ['Free space+Att+5$\sigma$','Free space+No Att+Filt+5$\sigma$','Ground+5$\sigma$']
 if DISPLAY ==3:  # HS1 vs flat
-  files = ["share/HS1freespace.primaries.5ants.3s","share/flat_freespace.primaries.5ants.3s","share/flat_ground.primaries.5ants.3s"]
+  files = ["share/HS1freespace.primaries.5ants.3s.v2.50200","share/flat_free_att_v2.primaries.5ants.3s.50200","share/flat_ground.primaries.5ants.3s"]
   col = ["k","r","g"]
   lin = ["-","-","-"]
   leg = ['HS1 Free space+3$\sigma$','Flat + Free space+3$\sigma$','Flat+Ground+3$\sigma$']
@@ -137,8 +137,8 @@ plt.figure(1)
 plt.legend(loc='best')
 plt.savefig("primaries-rate.png")
 plt.figure(2)
-plt.loglog(xi,exppreai,'-.',color='orange',lw=4,label="Present/ini (Agr)")
-plt.loglog(xi,exppreci,'-.',color = 'magenta',lw=4,label="Present/ini")
+plt.loglog(xi,exppreai,'-.',color='orange',lw=4,label="HS1 ini (Agr)")
+plt.loglog(xi,exppreci,'-.',color = 'magenta',lw=4,label="HS1 ini (Cons)")
 plt.legend(loc='best')
 plt.savefig("exposure.png")
 
