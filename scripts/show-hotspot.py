@@ -12,11 +12,12 @@ from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
+sys.path.append("../../lib/python")
 from grand_tour import Topography
 
 
 # Load the reduced events
-with open("share/events.p", "rb") as f:
+with open("share/hotspot-C.p", "rb") as f:
     n, data = pickle.load(f)
 data = numpy.array(data)
 
@@ -83,8 +84,8 @@ plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")
 plt.savefig("tau-zenith.png")
 
 plot_histogram(data[:, 9], data[:, 0], n)
-plt.xticks(numpy.linspace(-180., 180., 5))
-plt.axis((-200., 200., 0., 1E-01))
+plt.xticks(numpy.linspace(0., 360., 5))
+plt.axis((0., 360., 0., 1E-01))
 plt.yticks(numpy.linspace(0., 1E-01, 5))
 plt.xlabel(r"azimuth, $\phi_\tau$ (deg)")
 plt.ylabel(r"rate (deg$^{-1}$ a$^{-1}$)")

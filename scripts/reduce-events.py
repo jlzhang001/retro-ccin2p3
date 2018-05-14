@@ -4,6 +4,7 @@ import os
 import sys
 import time
 
+sys.path.append("../../lib/python")
 from retro.event import EventIterator
 
 

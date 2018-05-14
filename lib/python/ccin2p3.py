@@ -47,7 +47,7 @@ def retro_install(path=None, topography=None, hashtag=None):
         system("cd retro && git checkout " + hashtag, mute=True)
 
     # Build RETRO
-    system("cd retro && ./install.sh", mute=True)
+    system("cd retro && ./build.sh", mute=True)
     sys.path.append(os.path.join(path, "retro", "lib", "python"))
 
     # Get the topography tiles from /sps
@@ -114,7 +114,7 @@ def retro_run(events, options, setup=None, path=None):
             json.dump(setup, f)
 
     # Run RETRO
-    system(". retro/setup.sh && ./retro/bin/retro-run card.json")
+    system("./retro/bin/retro card.json")
 
     # Copy the data if required
     if path.startswith("irods://"):

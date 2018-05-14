@@ -15,7 +15,7 @@
 #$ -notify
 
 # Job array indices
-#$ -t 1-20
+#$ -t 1
 
 # CPU time
 #$ -l ct=12:00:00
@@ -46,9 +46,9 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "5f5bc54"
-N_EVENTS = 1000
-OUTDIR = "irods://grand/test/hotspot-sel4"
+RETRO_HASHTAG = "5c7d520"
+N_EVENTS = 10000
+OUTDIR = "irods://grand/test/hotspot-C"
 
 topography = {
     "latitude" : 42.1,
