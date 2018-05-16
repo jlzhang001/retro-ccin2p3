@@ -92,7 +92,8 @@ def retro_run(events, options, setup=None, path=None):
     """
 
     # Dump the configuration card
-    if (path is None) or (path.startswith("irods://")):
+    if ((path is None) or (path.startswith("irods://")) or
+        (path.startswith("hpss://"))):
         outfile = "events.json"
     else:
         outdir = os.path.dirname(path)
@@ -122,9 +123,15 @@ def retro_run(events, options, setup=None, path=None):
         for i in xrange(20):
             try:
                 system("iput -f {:} {:}".format(outfile, path))
-            except RuntimeError:
+            except RuntimeError as err:
+                print err
+                sys.stdout.flush()
                 time.sleep(6.)
             else:
                 break
         else:
             print "error: failed to upload", outfile
+    elif path.startswith("hpss://"):
+        path = path.replace("hpss://", "/hpss/in2p3.fr/group/trend/")
+        system("rfcp {:} {:}".format(outfile, path))
+        system("rfchmod 664 {:}".format(path))

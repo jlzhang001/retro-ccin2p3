@@ -5,6 +5,9 @@
 # Submit job under TREND group
 #$ -P P_trend
 
+# The job name
+#$ -N hotspot-C
+
 # Merge the stdout et stderr in a single file
 #$ -j y
 
@@ -30,7 +33,7 @@
 #$ -l os=cl7
 
 # Request access to iRODS and /sps
-#$ -l irods=1,sps=1
+#$ -l hpss=1,sps=1
 #===============================================================================
 """Generate tau decays for the hotspot array of 66x150 km2
 """
@@ -46,9 +49,9 @@ import ccin2p3
 # Settings
 ARRAY_SIZE = 66.5E+03, 150.4E+03
 ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "5c7d520"
+RETRO_HASHTAG = "687ee6d"
 N_EVENTS = 10000
-OUTDIR = "irods://grand/test/hotspot-C"
+OUTDIR = "hpss://grand/test/hotspot-agressive"
 
 topography = {
     "latitude" : 42.1,
@@ -76,6 +79,7 @@ options = {
     "topography" : topography,
 
     "selector" : {
+        "setup" : { "cone" : "agressive" },
         "vertex": { "limit": 4.0 }},
 
     "primary": {
@@ -95,7 +99,8 @@ for i in xrange(ny):
     yi = -0.5 * ARRAY_SIZE[1] + i * dc
     for j in xrange(nx):
         xj = -0.5 * ARRAY_SIZE[0] + j * dc
-        uij, alpha, beta = topo.ground_normal(xj, yi, angles=True)
+        uij, alpha, beta = topo.ground_normal(xj, yi, step=200.,
+            angles=True)
         zij = topo.ground_altitude(xj, yi)
         setup.append((xj + uij[0] * ANTENNA_HEIGHT,
                       yi + uij[1] * ANTENNA_HEIGHT,
