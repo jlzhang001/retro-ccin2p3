@@ -3,10 +3,17 @@ import os
 import sys
 import time
 
+sys.path.append("../../lib/python")
 from retro.event import EventIterator, EventLogger
 
-# Format the output directory
+# Parse the input arguments
 out_prefix = sys.argv[1]
+try:
+    events_per_file = int(sys.argv[2])
+except IndexError:
+    events_per_file = 400
+
+# Format the output directory
 while out_prefix.endswith("/"):
     out_prefix = out_prefix[:-1]
 out_prefix = os.path.basename(out_prefix)
@@ -29,12 +36,17 @@ for filename in os.listdir(sys.argv[1]):
         event.pop("previous")
         if log_event is None:
             # Create a new output file
-            out_index += 1
-            path = os.path.join(out_dir, "events.{:}.json".format(out_index))
+            if events_per_file <= 1:
+                path = os.path.join(
+                    out_dir, "{:}.json".format(event["tag"]))
+            else:
+                out_index += 1
+                path = os.path.join(
+                    out_dir, "events.{:}.json".format(out_index))
             log_event = EventLogger(path=path)
         log_event(**event)
         n_events += 1
-        if n_events == 400:
+        if n_events >= events_per_file:
             # Stop writting to the current output file
             log_event = None
             n_events = 0
