@@ -137,7 +137,10 @@ col = ["k","r","g"]
 #files = ["share/HS1_sel1000.p.5ants.3s","share/HS1flat_sel1000.p.5ants.3s"]
 #files = ["share/flat_sel1000.p.5ants.3s"]
 #files = ["share/HS1freespace.p.5ants.5s.noAtt","share/HS1ground.p.5ants.5s","share/HS1freespace.p.5ants.3s.noAtt","share/HS1freespace.p.5ants.3s"]
-files = ["share/HS1freespace.p.5ants.3s.50200","share/HS1freespace.p.5ants.3s",]  " Ref/target
+#files = ["share/HS1freespace.p.5ants.3s.50200","share/HS1freespace.p.5ants.3s",]   # Ref/target
+#files = ["share/HS1freespace.p.5ants.2s.v2.50200"]
+files = ["share/HS1ground.p.5ants.2s.50200"]
+
 for i in range(len(files)):
 # Load the reduced events
   print"Opening",files[i]
@@ -218,9 +221,9 @@ for i in range(len(files)):
   plt.hist(w,100)
   print len(w[w>0]),numpy.mean(w[w>0]),numpy.median(w[w>0])
   
-isnotintarget = numpy.setdiff1d(wref,wtarget)
-numpy.savetxt('isnotintarget.txt', isnotintarget)
-print len(numpy.intersect1d(wref,wtarget)),len(numpy.setdiff1d(wref,wtarget)),len(numpy.setdiff1d(wtarget,wref))
+#isnotintarget = numpy.setdiff1d(wref,wtarget)
+#numpy.savetxt('isnotintarget.txt', isnotintarget)
+#print len(numpy.intersect1d(wref,wtarget)),len(numpy.setdiff1d(wref,wtarget)),len(numpy.setdiff1d(wtarget,wref))
 plt.show()
  
 

@@ -108,9 +108,9 @@ if __name__ == "__main__":
      #if shower_energy>1:
      #  print 'Skip E'
      #  continue	
-     #if zen>89:
-     #  print 'Skip Zen'
-     #  continue
+     if zen>89:
+       print 'Skip Zen'
+       continue
      az = tau_dir[1]
      print  "Decay at position",decay_pos,"in direction (theta,phi)=",tau_dir
      cz = np.cos(zen*np.pi/180)
@@ -154,8 +154,8 @@ if __name__ == "__main__":
  
      # Voltage/Trigger infos
      antsIDs = checkTrig(evt)
-     #if bTrig:
-     if 1:
+     if len(antsIDs)>0:
+#     if 1:
  	 antsin = []
  	 Ampx=[]
  	 Ampy=[]
