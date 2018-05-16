@@ -54,10 +54,10 @@ N_EVENTS = 10000
 OUTDIR = "hpss://grand/test/hotspot-agressive"
 
 topography = {
-    "latitude" : 42.1,
-    "longitude" : 86.3,
-    "path" : "topography",
-    "stack_size" : 144 }
+    "latitude": 42.1,
+    "longitude": 86.3,
+    "path": "topography",
+    "stack_size": 144}
 
 
 # Install RETRO
@@ -71,16 +71,16 @@ print "  --> Done in {:.1f} s".format(time.time() - t0)
 # Generate the configuration card
 sx, sy = map(lambda x: 0.5 * x + 300E+03, ARRAY_SIZE)
 options = {
-    "generator" : { "theta" : ["uniform", [85.0, 95.0]],
-                    "energy" : [10**7.5, 10**10.5],
-                    "position" : [[-sx, sx],
-                                  [-sy, sy],
-                                  [0, 5E+03]] },
-    "topography" : topography,
+    "generator": {"theta": ["uniform", [85.0, 95.0]],
+                  "energy": [10**7.5, 10**10.5],
+                  "position": [[-sx, sx],
+                               [-sy, sy],
+                               [0, 5E+03]]},
+    "topography": topography,
 
-    "selector" : {
-        "setup" : { "cone" : "agressive" },
-        "vertex": { "limit": 4.0 }},
+    "selector": {
+        "setup": {"cone": "agressive"},
+        "vertex": {"limit": 4.0}},
 
     "primary": {
         "events": 10000,
@@ -100,7 +100,7 @@ for i in xrange(ny):
     for j in xrange(nx):
         xj = -0.5 * ARRAY_SIZE[0] + j * dc
         uij, alpha, beta = topo.ground_normal(xj, yi, step=200.,
-            angles=True)
+                                              angles=True)
         zij = topo.ground_altitude(xj, yi)
         setup.append((xj + uij[0] * ANTENNA_HEIGHT,
                       yi + uij[1] * ANTENNA_HEIGHT,
