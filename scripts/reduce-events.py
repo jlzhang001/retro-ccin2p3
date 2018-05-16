@@ -5,6 +5,7 @@ import sys
 import time
 import numpy as np
 
+sys.path.append("../../lib/python")
 from grand_tour import Topography
 from retro.event import EventIterator
 from common import checkTrig
@@ -18,15 +19,15 @@ def primary_flux(e):
 
 def summarise_tau(event,opt='sel'):
     """Extract the relevant tau info from an event"""
-    global origin, topo 
+    global origin, topo
     year = 365.25 * 24. * 60. * 60.
     _, e, (x, y, z), u, (la, lo, h), (t, p) = event["tau_at_decay"]   # Positions in meters
     [xx, yx, zx] = np.array([x, y, z]) + np.array(u) * 8000  # Assuming Xmax 8km after tau decay
     if event["origin"] != origin: #  Update the topography handle if required
       print "Loading new topo tile..."
       latitude, longitude = origin = event["origin"]
-      topo = Topography(latitude=latitude, longitude=longitude,path="share/topography", stack_size=121)     
-      
+      topo = Topography(latitude=latitude, longitude=longitude,path="share/topography", stack_size=121)
+
     zg = topo.ground_altitude(x, y)   #Meters
     zgx = topo.ground_altitude(xx, yx)   #Meters
     height = z-zg
@@ -42,7 +43,7 @@ def summarise_tau(event,opt='sel'):
     alpha = ants[:,3]
     beta = ants[:,4]
     nc = np.shape(ants)[0]  # Number of antennas in cone
-    
+
     targetw = np.loadtxt('isnotintarget.txt')
     if opt == 'sel':  # Trigger analysis
     	try:
@@ -57,7 +58,7 @@ def summarise_tau(event,opt='sel'):
     nt = len(antsIDs)   # Nb of trigged antennas
     bTrig, bCluster = checkCluster(event,antsIDs)
     nl = sum(bCluster) # Nb of clustered antennas
-	
+
     if bTrig and w > 0.:  # This shower triggered
         posCluster = [xants[antsIDs[bCluster]], yants[antsIDs[bCluster]],zants[antsIDs[bCluster]]]  # matrix of trigged antenna pos
 	posDecayTile = np.transpose(np.tile(np.array([x, y, z]),(nl,1)))  # matrix of decay pos
@@ -75,7 +76,7 @@ def summarise_tau(event,opt='sel'):
 def process(path, summarise,opt='sel'):
     """Summarise a set of event files"""
     tstart = time.time()
-    global origin, topo 
+    global origin, topo
     origin, topo = None, None
     generated, data = 0, []
     nf = 0
@@ -93,10 +94,10 @@ def process(path, summarise,opt='sel'):
                 data.append(d)
 	    else:
 	      novolt += 1
-	      #print 'novolt=',novolt	
+	      #print 'novolt=',novolt
 	if float(nf)/100 == np.floor(nf/100):
 	    print 'Nb of json files processed:',nf
-	
+
 	nf += 1
 	#print "  --> Done in {:.1f} s".format(time.time() - t0)
         #if nf==1000:
@@ -111,10 +112,10 @@ def process(path, summarise,opt='sel'):
     	path += "_sel.p"
     else:
     	path += ".p"
-    
+
     with open(path, "wb+") as f:
         pickle.dump((generated, data), f, -1)
-    
+
     print "o Events dumped to", path
     print "  --> All done in {:.1f} s".format(time.time() - tstart)
 
@@ -127,4 +128,3 @@ if __name__ == "__main__":
         process(sys.argv[1], summarise_tau,sys.argv[2])
     else:
         process(sys.argv[1], summarise_tau,'sel')
-	

@@ -4,6 +4,7 @@
 import sys
 exclude = "/usr/local/python/python-2.7/lib/python2.7/site-packages"
 sys.path = [v for v in sys.path if not (exclude in v)]
+sys.path.append("../../lib/python")
 
 import cPickle as pickle
 
@@ -35,7 +36,7 @@ def plot_histogram(samples, weight, generated, plot=plt.plot, col="k",figID=1, f
         norm = 1. / xerr
     p = n * norm
     dp = numpy.sqrt((n2 - n * n) / generated) * norm
-    
+
     plt.figure(figID)
     if factor is None:
         y = p
@@ -91,8 +92,8 @@ def doPlots(n, data,col="k"):
   plt.xlabel(r"decay height above ground (m)")
   plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
   plt.savefig("tau-height.png")
-  
-  
+
+
 
 def doTopoPlot(data):
   rate, xe, ye = histogram2d(data[:, 6], data[:, 5], 100,
@@ -100,7 +101,7 @@ def doTopoPlot(data):
   rate *= mu
   x = 0.5 * (xe[1:] + xe[:-1])
   y = 0.5 * (ye[1:] + ye[:-1])
- 
+
   # Compute the topography
   topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",
   		    stack_size=49)
@@ -108,7 +109,7 @@ def doTopoPlot(data):
   for i, yi in enumerate(y):
       for j, xj in enumerate(x):
   	  h[i, j] = topo.ground_altitude(yi, xj, geodetic=True)
- 
+
   plt.figure()
   plt.contour(x, y, h, 10, colors="k", alpha=0.75)
   plt.pcolor(x, y, rate, cmap="nipy_spectral", norm=LogNorm(), alpha=0.5)
@@ -121,7 +122,7 @@ def doTopoPlot(data):
   plt.ylabel(r"latitude (deg)")
   plt.title(r"$\tau$ rate (yr$^{-1}$ / deg$^2$)")
   plt.savefig("tau-rate-map.png")
-  
+
 # Estimate the decay density
 def histogram2d(*args, **kwargs):
     """Encapsulate numpy.histogram2d for matrix convention compatibility"""
@@ -137,7 +138,7 @@ col = ["k","r","g"]
 #files = ["share/HS1_sel1000.p.5ants.3s","share/HS1flat_sel1000.p.5ants.3s"]
 #files = ["share/flat_sel1000.p.5ants.3s"]
 #files = ["share/HS1freespace.p.5ants.5s.noAtt","share/HS1ground.p.5ants.5s","share/HS1freespace.p.5ants.3s.noAtt","share/HS1freespace.p.5ants.3s"]
-files = ["share/HS1freespace.p.5ants.3s.50200","share/HS1freespace.p.5ants.3s",]  " Ref/target
+files = ["share/HS1freespace.p.5ants.3s.50200","share/HS1freespace.p.5ants.3s",]  # Ref/target
 for i in range(len(files)):
 # Load the reduced events
   print"Opening",files[i]
@@ -151,7 +152,7 @@ for i in range(len(files)):
   nclust = data[:,15]
   dmin = data[:,16]
   dmax = data[:,17]
-  
+
   plt.figure(17)
   plt.subplot(221)
   plt.hist(dmin[dmin>0],100)
@@ -167,9 +168,9 @@ for i in range(len(files)):
   plt.plot(theta[dmin>0],dmax[dmax>0],'ob')
   plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
   plt.ylabel('Dmax (km)')
-  
+
   print "Nb events with antennas further than 90km:",sum(dmin>90)
-  
+
   plt.figure(23)
   plt.title('$N_{ants}$ in events (with 1+ voltage')
   plt.subplot(411)
@@ -185,14 +186,14 @@ for i in range(len(files)):
   plt.xlabel(r"$log_{10}(N_{RadioSim}^*)$")
   print "Radio sim stats: [N,minAnts,maxAnts,<Ants>]",len(nvolts[nvolts>0]),numpy.min(nvolts[nvolts>0]),numpy.max(nvolts[nvolts>0]),numpy.mean(nvolts[nvolts>0])
   print "Radio sim stats (events with 5+ ants): [N,minAnts,maxAnts,<Ants>]",len(nvolts[nvolts>4]),numpy.min(nvolts[nvolts>4]),numpy.max(nvolts[nvolts>4]),numpy.mean(nvolts[nvolts>4])
-  
+
   plt.subplot(413)
   plt.hist(numpy.log10(ntrigs[ntrigs>0]),100)
   #plt.xlim(0.1,max(numpy.log10(ncones)))
   plt.xlabel(r"$log_{10}(N_{Trig})$")
   print "Trigged events stats: [N,minAnts,maxAnts,<Ants>]",len(ntrigs[ntrigs>0]),numpy.min(ntrigs[ntrigs>0]),numpy.max(ntrigs[ntrigs>0]),numpy.mean(ntrigs[ntrigs>0])
   print "Trigged events stats (events with 5+ ants): [N,minAnts,maxAnts,<Ants>]",len(ntrigs[ntrigs>4]),numpy.min(ntrigs[ntrigs>4]),numpy.max(ntrigs[ntrigs>4]),numpy.mean(ntrigs[ntrigs>4])
-    
+
   plt.subplot(414)
   plt.hist(numpy.log10(nclust[nclust>0]),100)
   #plt.xlim(0.1,max(numpy.log10(ncones)))
@@ -200,9 +201,9 @@ for i in range(len(files)):
   print "Clustered events stats: [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>0]),numpy.min(nclust[nclust>0]),numpy.max(nclust[nclust>0]),numpy.mean(nclust[nclust>0])
   print "Clustered events stats (events with 4+ ants): [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>3]),numpy.min(nclust[nclust>3]),numpy.max(nclust[nclust>3]),numpy.mean(nclust[nclust>3])
 
-  # Print the total rate  
+  # Print the total rate
   print n,sum(data[:,0]>0),sum(data[:,0])
-  mu = sum(data[:,0]) / n 
+  mu = sum(data[:,0]) / n
   sigma = sum(data[:,0]**2) / n
   sigma = numpy.sqrt((sigma - mu**2) / n)
   print "Rate = {:.3f} +-{:.3f} yr^-1".format(mu, sigma)
@@ -211,16 +212,14 @@ for i in range(len(files)):
 
   plt.figure()
   w = data[:,0]
-  if i==0:  
+  if i==0:
     wref = w
   if i==1:
     wtarget = w
   plt.hist(w,100)
   print len(w[w>0]),numpy.mean(w[w>0]),numpy.median(w[w>0])
-  
+
 isnotintarget = numpy.setdiff1d(wref,wtarget)
 numpy.savetxt('isnotintarget.txt', isnotintarget)
 print len(numpy.intersect1d(wref,wtarget)),len(numpy.setdiff1d(wref,wtarget)),len(numpy.setdiff1d(wtarget,wref))
 plt.show()
- 
-
