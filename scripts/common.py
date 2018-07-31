@@ -7,8 +7,8 @@ sys.path.append(RETRODIR+"lib/python/")
 from retro.event import EventIterator
 
 noise = 15. #muV (minimal rms noise level on HorizonAntenna in 50-200MHz)
-step = 1000.
-DISPLAY = 0
+step = 500.
+DISPLAY = 1
 
     
 def checkCluster(event,antIDs,nantsmin=3):
@@ -76,9 +76,11 @@ def checkCone(event):
     
     return tAntsID
    
-def checkTrig(event,thresh=3):
+def checkTrig(event,thresh=2):
     #print """checkTrig: determines if event trigs array. Returns list of trigged antennas.""" 
     th = thresh*noise  #
+    print "Threshold (muV) = ",th
+    print "Step (m) = ",step
     bAntIn = setStep(event,step)  # is it a "true" antenna pos? (ie sim with 500m step)
     antIDs = np.where(bAntIn)[0]  # Antenna ID
     #print "len(antIDs):",len(antIDs)
@@ -119,7 +121,7 @@ def checkTrig(event,thresh=3):
       yants = ants[:,1]
       pl.figure(1)
       pl.scatter(xants[tAntsID],yants[tAntsID],marker='o',color='b')
-    
+      pl.show()
     return tAntsID
 
 #

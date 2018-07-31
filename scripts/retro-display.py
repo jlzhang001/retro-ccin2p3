@@ -31,20 +31,88 @@ else:
 sys.path.append(RETRODIR)
 sys.path.append(RETRODIR+"lib/python/")
 from retro.event import EventIterator
+from grand_tour import Topography
+
 #from display import Display  # Not used anymore
 sys.path.append("/home/martineau/GRAND/soft/neutrinos/retro/lib/python")
 from display_omh import DisplayOMH # in /home/martineau/GRAND/soft/neutrinos/retro/lib/python
-
+import pylab as pl
+import numpy as np
 
 display = DisplayOMH()
 
+def ants(event):
+
+  ra = np.array(event["antennas"])[:, :3] * 1E-03
+  #pl.figure(1)
+  #pl.plot(ra[:,0],ra[:,1],'go') 
+  #pl.show()
+  return ra[:,0],ra[:,1]
+
+def dumpIni(event):
+
+  global origin, topo
+  if event["origin"] != origin:
+      # Update the topography handle if required
+      latitude, longitude = origin = event["origin"]
+      print "Topography around (lat,long)=",latitude, longitude
+      topo = Topography(latitude=latitude, longitude=longitude,  	  path="share/topography", stack_size=121)
+
+
+  # Format info for txt file to be analyzed in ciompareConeIniNew.m
+  _, e, (x0, y0, z0), u, (la, lo, h), (t, p) = event["tau_at_decay"]
+  print "Decay pos (m) = ",x0, y0, z0
+  zg = topo.ground_altitude(x0, y0)
+  print "Ground altitude @ decay point (GRANDref, m)=",zg 
+  print "Shower vec dir =",u
+  
+  # Compute the shower energy
+  shower_energy = 0.
+  for (pid_, momentum) in event["decay"]:
+    aid = abs(pid_)
+    if aid in (12, 13, 14, 16):
+      continue
+    shower_energy += sum(m**2 for m in momentum)**0.5
+  print "shower energy (GeV) =",shower_energy
+  ra = np.array(event["antennas"])[:, :3]
+  nants = np.shape(ra)[0]
+  print "Nants in cone = ", nants
+
+  x = np.array([shower_energy,u[0],u[1],u[2],x0,y0,z0,zg,nants])
+  np.savetxt(f,x.reshape(1, x.shape[0]),fmt="%3.4f")  
+    
 if __name__ == "__main__":
+    i = 0
+    global origin, topo
+    origin, topo = None, None
+    #xall = np.zeros(shape=(0,0))
+    #yall = np.zeros(shape=(0,0))
     path = sys.argv[1]
+    f = open('compIniGRAND.txt','ab')
+    #np.savetxt(f,"#E (GeV), u(GRANDconv), x_decay(GRANDconv)",delimiter=" ",fmt="%s")
     for name in os.listdir(path):
         if not name.endswith("json"):
 	    continue
 	filename = os.path.join(path, name)
         print "o Processing", filename
         for event in EventIterator(filename):
-            display(event)
+	    i += 1
+	    #xa,ya = ants(event)
+	    #xall = np.append(xall,xa)
+	    #yall = np.append(yall,ya)
+	    #display(event)
 	    #fresnel(event)
+	    dumpIni(event)
+	    
+        #if i >1000:
+        #  break
+    
+    f.close()
+    #pl.figure()
+    #pl.subplot(211)
+    #pl.hist(xall,100)
+    #pl.xlabel('Antenna X pos (km)')
+    #pl.subplot(212)
+    #pl.hist(yall,100)
+    #pl.xlabel('Antenna Y pos (km)')
+    #pl.show()

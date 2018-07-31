@@ -34,6 +34,7 @@ def summarise_tau(event,opt='sel'):
     heightx = zx-zg
     #print x,y,height, xx,yx,heightx
     w = [v[0] * primary_flux(v[1]) for v in event["primaries"]]
+    wa = [v[0] * primary_flux(v[1] * v[3]) for v in event["primaries"]]
     w = sum(w) * year / event["statistics"][1]
     n = event["statistics"][0]
     ants = np.array(event["antennas"])
@@ -67,7 +68,7 @@ def summarise_tau(event,opt='sel'):
     mask = np.in1d(w,targetw)
     if sum(mask)>0:
       print event["tag"],w
-        data = [w, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl, dmin, dmax]
+        data = [w, wa, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl, dmin, dmax]
     else:
         data = [0, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, 0,0,0]
     return n, data
