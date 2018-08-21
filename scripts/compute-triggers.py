@@ -18,9 +18,9 @@ from common import checkCluster
 # Get the global topography handle
 topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",stack_size=49)
 
-DISPLAY = 1
+DISPLAY = 0
 step = 500.
-plt.style.use("../retro/plugins/display/deps/mplstyle-l3/style/l3.mplstyle")
+#plt.style.use("../retro/plugins/display/deps/mplstyle-l3/style/l3.mplstyle")
 
 def primary_flux(e):
     """Waxman-Bahcall bound with 1 / 3 of tau neutrinos"""
@@ -41,7 +41,7 @@ def add_triggers(event, latitude, longitude, rate, opt='sel'):
     n = event["statistics"][0]
 
     if opt=='sel':
-        _,antsIDs = checkTrig(event) 
+        antsIDs = checkTrig(event) 
 	bTrig, _ = checkCluster(event,antsIDs,'a')
     else:
         bTrig = True
@@ -164,8 +164,8 @@ def process(path, latitude, longitude, rate,opt='sel'):
         #print "  --> Done in {:.1f} s".format(time.time() - t0)
 	if float(nf)/100 == np.floor(nf/100):
   	  print 'Nb of json files processed:',nf
-  	if nf==1000:
-	  break
+  	#if nf==1000:
+	#  break
 
 
     if generated > 0:
