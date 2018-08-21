@@ -32,12 +32,15 @@ pl.ion()
 #pl.ioff()
 
 noise = 15. #muV (minimal rms noise level on HorizonAntenna in 50-200MHz)
-th = 4*noise
+th = 2*noise
 
 
 def amp2DPattern(zvector,tit):
     pl.figure()
-    norm = colors.Normalize(vmin=zvector.min(),vmax=zvector.max())
+    if len(zvector)>1:
+      norm = colors.Normalize(vmin=zvector.min(),vmax=zvector.max())
+    else:
+      norm = colors.Normalize(vmin=0,vmax=100)
     pl.scatter(decay_pos[0]/1e3, decay_pos[1]/1e3,  c='r', marker='h',s=100)
     pl.plot([decay_pos[0]/1e3, vend[0]/1e3],[decay_pos[1]/1e3, vend[1]/1e3],'r')
     pl.scatter(xants/1e3,yants/1e3,c=zvector,marker='o',cmap='jet',s=200,norm=norm)
@@ -103,14 +106,13 @@ if __name__ == "__main__":
     	if aid in (12, 13, 14, 16):
     	    continue
     	shower_energy += sum(m**2 for m in momentum)**0.5
-     shower_energy = shower_energy/1e9	
-     print shower_energy
-     #if shower_energy>1:
-     #  print 'Skip E'
-     #  continue	
-     if zen>89:
-       print 'Skip Zen'
-       continue
+     shower_energy = shower_energy/1e9	 # now in EeV
+     if shower_energy<1:
+       print 'Skip E'
+       continue        
+     #if zen>89:
+     #  print 'Skip Zen'
+     #  continue
      az = tau_dir[1]
      print  "Decay at position",decay_pos,"in direction (theta,phi)=",tau_dir
      cz = np.cos(zen*np.pi/180)
@@ -123,46 +125,54 @@ if __name__ == "__main__":
      # Ants infos
      ants = np.array(evt["antennas"])
      xants = ants[:,0]
-     print "Nb of antennas in cone (1000m step):",float(len(xants))/4
+     print "Nb of antennas in cone (500m step):",float(len(xants))
      yants = ants[:,1]
      zants = ants[:,2]
      alpha = ants[:,3]
      beta = ants[:,4]
- 
-     pl.figure(222)
-     pl.subplot(131)
-     pl.plot(xants/1e3,yants/1e3,'k+')
-     pl.plot(decay_pos[0]/1e3,decay_pos[1]/1e3,'ro')
-     pl.plot([decay_pos[0]/1e3, vend[0]/1e3],[decay_pos[1]/1e3, vend[1]/1e3],'r')
-     pl.grid(True)
-     pl.xlabel('SN (km)')
-     pl.ylabel('EW (km)')
-     pl.subplot(132)
-     pl.plot(xants/1e3,zants/1e3,'k+')
-     pl.plot(decay_pos[0]/1e3,decay_pos[2]/1e3,'ro')
-     pl.plot([decay_pos[0]/1e3, vend[0]/1e3],[decay_pos[2]/1e3, vend[2]/1e3],'r')
-     pl.grid(True)
-     pl.xlabel('SN (km)')
-     pl.ylabel('Alt (km)')
-     pl.subplot(133)
-     pl.plot(yants/1e3,zants/1e3,'k+')
-     pl.plot(decay_pos[1]/1e3,decay_pos[2]/1e3,'ro')
-     pl.plot([decay_pos[1]/1e3, vend[1]/1e3],[decay_pos[2]/1e3, vend[2]/1e3],'r')
-     pl.grid(True)
-     pl.xlabel('EW (km)')
-     pl.ylabel('Alt (km)')
- 
+     
+     if 1:
+       pl.figure(222)
+       pl.subplot(131)
+       pl.plot(xants/1e3,yants/1e3,'ko')
+       pl.plot(decay_pos[0]/1e3,decay_pos[1]/1e3,'ro')
+       pl.plot([decay_pos[0]/1e3, vend[0]/1e3],[decay_pos[1]/1e3, vend[1]/1e3],'r')
+       pl.grid(True)
+       pl.xlabel('SN (km)')
+       pl.ylabel('EW (km)')
+       pl.subplot(132)
+       pl.plot(xants/1e3,zants/1e3,'ko')
+       pl.plot(decay_pos[0]/1e3,decay_pos[2]/1e3,'ro')
+       pl.plot([decay_pos[0]/1e3, vend[0]/1e3],[decay_pos[2]/1e3, vend[2]/1e3],'r')
+       pl.grid(True)
+       pl.xlabel('SN (km)')
+       pl.ylabel('Alt (km)')
+       pl.subplot(133)
+       pl.plot(yants/1e3,zants/1e3,'ko')
+       pl.plot(decay_pos[1]/1e3,decay_pos[2]/1e3,'ro')
+       pl.plot([decay_pos[1]/1e3, vend[1]/1e3],[decay_pos[2]/1e3, vend[2]/1e3],'r')
+       pl.grid(True)
+       pl.xlabel('EW (km)')
+       pl.ylabel('Alt (km)')
+     
      # Voltage/Trigger infos
-     antsIDs = checkTrig(evt)
-     if len(antsIDs)>0:
-#     if 1:
+     antsIDs = checkTrig(evt,0)
+#     if len(antsIDs)>0:
+     if 1:
  	 antsin = []
  	 Ampx=[]
  	 Ampy=[]
  	 Ampz=[]
  	 Ampxy = [];
- 	 v = np.array(evt["voltage"])
- 	 print "Nb of antennas with radio (1000m step):",float(np.shape(v)[0])/4
+ 	 try:  
+	   v = np.array(evt["voltage"])
+         except:
+           print "No voltage!"
+	   pl.show()
+	   pl.close("all")
+	   continue
+	 
+	 print "Nb of antennas with radio sim (500m step):",float(np.shape(v)[0])
  	 for i in range(np.shape(v)[0]):
  	   antsin.append(int(v[i,0]))  # Index of antennas with radio simulation
  	   Ampx.append(float(v[i,1]))  # NS arm
@@ -182,10 +192,10 @@ if __name__ == "__main__":
 	   
      else:
  	 print "Shower not triggered."
- 	 continue
+	 #continue
 
-     print "Nb of antennas trigged:",len(antsIDs)
-     print "(NS,EW,Vert,NS+EW):",np.sum(Ampx>th),np.sum(Ampy>th),np.sum(Ampz>th),np.sum(Ampxy>th*np.sqrt(2))
+     print "Nb of antennas with voltage>0:",len(antsIDs)
+     print "Trig pattern: (NS,EW,Vert,NS+EW):",np.sum(Ampx>th),np.sum(Ampy>th),np.sum(Ampz>th),np.sum(Ampxy>th*np.sqrt(2))
  
      xantsr = xants[antsin]
      yantsr = yants[antsin]

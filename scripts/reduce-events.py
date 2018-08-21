@@ -35,7 +35,11 @@ def summarise_tau(event,opt='sel'):
     heightx = zx-zg
     #print x,y,height, xx,yx,heightx
     w = [v[0] * primary_flux(v[1]) for v in event["primaries"]]
+<<<<<<< HEAD
     wa = [v[0] * v[3] * primary_flux(v[1])  for v in event["primaries"]]
+=======
+    wa = [v[0] * primary_flux(v[1] * v[3]) for v in event["primaries"]]
+>>>>>>> 022e71bf591ad1a7dcbd6b4ba4ba815f5f2fbd5b
     w = sum(w) * year / event["statistics"][1]
     wa = sum(wa) * year / event["statistics"][1]
     n = event["statistics"][0]
@@ -65,6 +69,7 @@ def summarise_tau(event,opt='sel'):
 
     if bTrig and w > 0.:  # This shower triggered
         posCluster = [xants[antsIDs[bCluster]], yants[antsIDs[bCluster]],zants[antsIDs[bCluster]]]  # matrix of trigged antenna pos
+<<<<<<< HEAD
         posDecayTile = np.transpose(np.tile(np.array([x, y, z]),(nl,1)))  # matrix of decay pos
         dist = np.linalg.norm(posCluster-posDecayTile,axis=0)
         dmin,dmax = np.min(dist)/1e3,np.max(dist)/1e3
@@ -73,6 +78,15 @@ def summarise_tau(event,opt='sel'):
     #if sum(mask)>0:
         #print event["tag"],w
         data = [w, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl, dmin, dmax, wa]
+=======
+    posDecayTile = np.transpose(np.tile(np.array([x, y, z]),(nl,1)))  # matrix of decay pos
+    dist = np.linalg.norm(posCluster-posDecayTile,axis=0)
+    dmin,dmax = np.min(dist)/1e3,np.max(dist)/1e3
+    mask = np.in1d(w,targetw)
+    if sum(mask)>0:
+      print event["tag"],w
+        data = [w, wa, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl, dmin, dmax]
+>>>>>>> 022e71bf591ad1a7dcbd6b4ba4ba815f5f2fbd5b
     else:
         data = [0, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, 0,0,0,0]
     return n, data
