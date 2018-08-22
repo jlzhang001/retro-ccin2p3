@@ -57,14 +57,14 @@ plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
 def doPlots(n, data, col="k"):
     
-    x, p = plot_histogram(data[:, 1], data[:, 0]-data[:, 18], n, figID=1, plot=plt.loglog, col=col)
-    xa, pa = plot_histogram(data[:, 1], data[:, 18], n, figID=1, plot=plt.loglog, col="r")
+    x, p = plot_histogram(data[:, 1], data[:, 0], n, figID=1, plot=plt.loglog, col=col)
+    #xa, pa = plot_histogram(data[:, 1], data[:, 18], n, figID=1, plot=plt.loglog, col="r")
     plt.xlabel(r"energy, E$_\tau$ (GeV)")
     plt.ylabel(r"E$_\tau \times$ rate (yr$^{-1}$)")
     plt.savefig("tau-energy.png")
 
     plt.figure(11)
-    print data[:, 18]/data[:, 0]
+    #print data[:, 18]/data[:, 0]
     plot_histogram(data[:, 1], data[:, 18]/data[:, 0], n, figID=11)
     plt.xlabel(r"energy, E$_\tau$ (GeV)")
     plt.ylabel(r"Atm/Ground")
@@ -77,20 +77,21 @@ def doPlots(n, data, col="k"):
     plt.ylabel(r"ratio")
     plt.savefig("tau-ratio.png")
 
-    plot_histogram(90-data[:, 8], data[:, 0]-data[:, 18], n, col=col, figID=3)
-    plot_histogram(90-data[:, 8], data[:, 18]*10, n, figID=3, col="r")
-    #plt.axis((85., 95., 0., 6.))
-    #plt.xlim(85., 95.)
-    #plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
+    plot_histogram(90-data[:, 8], data[:, 0], n, col=col, figID=3)
+    #plot_histogram(90-data[:, 8], data[:, 18], n, figID=3, col="r")
+    #plt.axis((-4., 95., 0., 6.))
+    plt.xlim(-5., 5.)
+    plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
     plt.xlabel(r"Elevation angle (deg)")
     plt.ylabel(r"rate (deg$^{-1}$ yr$^{-1}$)")
     plt.savefig("tau-zenith.png")
 
     plot_histogram(data[:, 9], data[:, 0], n, col=col, figID=4)
-    plt.xticks(numpy.linspace(-180., 180., 5))
+    print data[:, 9]
+    plt.xticks(numpy.linspace(0., 360., 5))
     #plt.axis((-200., 200., 0., 1E-01))
     #plt.yticks(numpy.linspace(0., 1E-01, 5))
-    plt.xlim(-180., 180.)
+    plt.xlim(0., 360.)
     plt.xlabel(r"azimuth, $\phi_\tau$ (deg)")
     plt.ylabel(r"rate (deg$^{-1}$ yr$^{-1}$)")
     # plt.savefig("tau-azimuth.png")
@@ -102,8 +103,8 @@ def doPlots(n, data, col="k"):
     plt.savefig("tau-altitude.png")
 
     plot_histogram(data[:, 10], data[:, 0], n, col=col, figID=6)
-    plot_histogram(data[:, 11], data[:, 0], n, col='r', figID=6)
     plt.xlabel(r"decay height above ground (m)")
+    plt.xlim(0., 6000.)
     plt.ylabel(r"rate (km$^{-1}$ a$^{-1}$)")
     plt.savefig("tau-height.png")
 
@@ -147,9 +148,8 @@ def histogram2d(*args, **kwargs):
 
 
 col = ["k", "r", "g"]
-#files = ["share/HS1ground.p.5ants.2s.50200"]
-#files = ["share/jsons_att_v2f_sel.p"]
-files = ["share/simu60.p.5ants.agr_f50200","share/simu60.p.5ants.agr.v2106",]
+#files = ["share/HS1ground.p.5ants.2s.50200.090818","share/HS1ground.p.5ants.2s.50200"]
+files = ["share/HS1ground.p.5ants.2s.50200.090818"]
 
 for i in range(len(files)):
 # Load the reduced events

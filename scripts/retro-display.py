@@ -100,9 +100,9 @@ if __name__ == "__main__":
 	    #xa,ya = ants(event)
 	    #xall = np.append(xall,xa)
 	    #yall = np.append(yall,ya)
-	    #display(event)
+	    display(event)
 	    #fresnel(event)
-	    dumpIni(event)
+	    #dumpIni(event)
 	    
         #if i >1000:
         #  break

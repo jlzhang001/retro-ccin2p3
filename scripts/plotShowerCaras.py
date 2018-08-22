@@ -107,9 +107,9 @@ if __name__ == "__main__":
     	    continue
     	shower_energy += sum(m**2 for m in momentum)**0.5
      shower_energy = shower_energy/1e9	 # now in EeV
-     if shower_energy<1:
-       print 'Skip E'
-       continue        
+     #if shower_energy<1:
+     #  print 'Skip E'
+     #  continue        
      #if zen>89:
      #  print 'Skip Zen'
      #  continue
@@ -126,6 +126,9 @@ if __name__ == "__main__":
      ants = np.array(evt["antennas"])
      xants = ants[:,0]
      print "Nb of antennas in cone (500m step):",float(len(xants))
+     if float(len(xants))<100:
+        print 'Skip Nants'
+        continue  
      yants = ants[:,1]
      zants = ants[:,2]
      alpha = ants[:,3]

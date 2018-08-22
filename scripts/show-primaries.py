@@ -9,7 +9,7 @@ import cPickle as pickle
 
 import numpy
 import matplotlib.pyplot as plt
-DISPLAY = 5
+DISPLAY = 1
 dur = 3 # years
 plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
@@ -71,21 +71,18 @@ def getRate(pfile):
 
     return n, data
 
-#files = ["share/old/HS1_sel1000.primaries.p.5ants.3s","share/old/HS1_sel1000.primaries.p.8ants.10s",]
-#files = ["/home/martineau/GRAND/GRAND/data/massProd/HS1/HS1freespace/noatt.primaries.p","share/HS1ground.primaries.5ants.5s","share/HS1freespace.primaries.5ants.5s","share/HS1freespace.primaries.5ants.5s.50200","share/HS1freespace.primaries.5ants.5s.noAtt","share/HS1ground.primaries.5ants.3s","share/HS1freespace.primaries.5ants.3s","share/HS1freespace.primaries.5ants.3s.noAtt"]
-if DISPLAY == 1:  # Comparison to initial study
-  #files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1ground.primaries.5ants.2s.50200"]
-  #leg = ['Analytical attenuation (2$\sigma$ th)','Ground simulation (2$\sigma$ th)']
-  files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1freespace.primaries.5ants.6s.v2.50200","share/HS1cone.primaries.5ants.full","share/HS1cone.primaries.5ants.90km","share/HS1cone.primaries.5ants.agr"]
-  leg = ['Free space + att (2$\sigma$ th)','Free space + att (6$\sigma$ th)','Cone 3deg','Cone 3deg($<$90km)','Cone (agr)']
-  col = ["b","g","k","k","k"]
-  lin = ["-","-","-",'--',":"]
+if DISPLAY == 1:  # HS1 final
+  files = ["share/HS1ground.primaries.5ants.2s.full.090818","share/HS1ground.primaries.5ants.2s.f50200.090818","share/HS1ground.primaries.5ants.3s.f50200.090818","share/HS1ground.primaries.5ants.5s.f50200.090818"]
+  leg = ['Ground Full Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)']
+  col = ["b","b",'magenta','cyan']
+  lin = ["-","--",'-','-']
+  
 if DISPLAY == 2:  # Free space vs ground
-  files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1ground.primaries.5ants.2s.50200","share/HS1freespace.primaries.5ants.2s.noAtt.50200"]
-  files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1ground.primaries.5ants.2s.50200","share/jsons_att_v2f.primaries_sel.p"]
-  col = ["r","g","b"]
-  lin = ["-","-","-"]
-  leg = ['Free space + att (2$\sigma$ th)','Ground (2$\sigma$ th)','Ground new (2$\sigma$ th)']
+  files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1freespace.primaries.5ants.2s.noAtt.50200","share/HS1ground.primaries.5ants.2s.50200","share/HS1ground.primaries.5ants.2s.full.090818","share/HS1ground.primaries.5ants.2s.f50200.090818","share/HS1ground.primaries.5ants.3s.f50200.090818","share/HS1ground.primaries.5ants.5s.f50200.090818"]
+  col = ["g","g","b","k","k","r","r"]
+  lin = ["-","--","-","--","-","-","--"]
+  leg = ['Free space + att 50-200MHz May 21 (2$\sigma$ th)' ,'Free space + No att 50-200MHz May 21 (2$\sigma$ th)','Ground 50-200MHz May 21(2$\sigma$ th)','Ground Full Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)']
+  
 if DISPLAY == 3:  # HS1 vs flat
   files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1freespace.primaries.5ants.5s.v2.50200","share/flat_freespace.primaries.5ants.2s.v2.50200","share/HS1freespace.primaries.5ants.2s.v2.50200.500m"]
   col = ["r","g","brown",'r']
@@ -102,10 +99,10 @@ if DISPLAY == 5: # 60000km2 area
   #col = ["k","b","b",'k','k','g','g',"b"]
   #lin = ["-","-","--","-","--",'-','--',":"]
   #leg = ['60k cone new 800m v0 (5 ants)','60k cone new 800m v2 (5 ants)','60k cone new 800m v2 - no cluster (5 ants)','60k cone new 800m v3 (5 ants)','60k cone new 800m v3 - no cluster (5 ants)','60k cone new 1200m v3 (5 ants)','60k cone new 1200m v3 - no cluster (5 ants)',"60k cone radio (agr)"]
-  files = ["share/simu60kcone.primaries.5ants.agr.800m.v0","share/simu60kcone.primaries.5ants.agr.800m.v2","share/simu60.primaries.5ants.agr.v2106","share/simu60.primaries.5ants.agr.v0807","share/simu60.primaries.5ants.agr_f50200"]
-  col = ["k","k","b","b","g"]
-  lin = ["--","-","--",'-',"-"]
-  leg = ['60k cone new 800m June 1st (5 ants)','60k cone new 800m June 22nd (5 ants)',"60k RM June 22nd (agr)","60k RM July 8 (agr)","60k RM July 8 50-200MHz (agr)"]
+  files = ["share/simu60kcone.primaries.5ants.agr.800m.v0","share/simu60kcone.primaries.5ants.agr.800m.v3","share/simu60kcone.primaries.5ants.noclust.agr.800m.v3","share/simu60.primaries.5ants.agr.v2106","share/simu60.primaries.5ants.agr.v0807","share/simu60kconepresel.primaries.5ants.agr.1000m.09082018","share/simu60.primaries.5ants.2s.full.090818","share/simu60.primaries.5ants.2s.f50200.1000m.090818","share/simu60.primaries.5ants.3s.f50200.090818","share/simu60.primaries.5ants.5s.f50200.090818"]
+  col = ["k","k","k","g","r","b","b","b",'magenta','cyan']
+  lin = ["--","-",":","-",'-',":","-","--",'-','-','-']
+  leg = ['60k cone ana 800m June 1st (5 ants)','60k cone ana 800m June 22nd (5 ants)','60k cone ana 800m June 22d (noclust)',"60k RM June 22nd (2$\sigma$ th)","60k RM July 8 (2$\sigma$ th)",'60k cone presel 1000m Aug 08 (5 ants)','60k RM Aug 08 (2$\sigma$ th)','60k RM 50-200MHz Aug 08 (2$\sigma$ th)','60k RM 50-200MHz Aug 08 (3$\sigma$ th)','60k RM 50-200MHz Aug 08 (5$\sigma$ th)']
   
 yv = numpy.zeros([len(files),50])
 for i in range(len(files)):
@@ -134,11 +131,11 @@ for i in range(len(files)):
     if i == 1:
 #      plt.loglog(x,dlim200k,linestyle="-",color="green",lw=4,label="GRAND200k (5$\sigma$ th)")
       plt.loglog(x,dlim,linestyle="-",color="k",lw=4,label="60k cone new 800m June 22nd (5 ants)")
-    if i == 3:
-      plt.loglog(x,dlim,linestyle="-",color="b",lw=4,label="60k RM July 8 (agr)")
+#    if i == 3:
+#      plt.loglog(x,dlim,linestyle="-",color="b",lw=4,label="60k RM July 8 (agr)")
 #      plt.loglog(x,dlim200k,linestyle="--",color="brown",lw=4,label="GRAND200k - flat(2$\sigma$ th)")
     if i == 4:
-      plt.loglog(x,dlim,linestyle="-",color="g",lw=4,label="60k RM July 8 50-200MHz (agr)")
+      plt.loglog(x,dlim,linestyle="-",color="b",lw=4,label="60k RM July 8 50-200MHz (agr)")
             
     if i == 4:
       eHS1ini = 1.0e+11 *numpy.array([0.0030, 0.0038, 0.0048, 0.0060, 0.0075, 0.0095, 0.0119, 0.0150, 0.0189, 0.0238, 0.0300, 0.0378, 0.0475, 0.0599, 0.0754, 0.0949, 0.1194, 0.1504, 0.1893, 0.2383, 0.3000, 0.3777, 0.4755, 0.5986, 0.7536, 0.9487, 1.1943, 1.5036, 1.8929, 2.3830, 3.0000, 3.7768, 4.7547, 5.9858, 7.5357, 9.4868])
@@ -184,16 +181,16 @@ if DISPLAY<5:
 plt.legend(loc='best')
 plt.savefig("exposure.png")
 
-rpa = yv[2,:]/exppreai  # Agressive prel to Agressive now
-rca = yv[1,:]/exppreci  # Conservative prel to Conservative now
-plt.figure(3)
-plt.semilogx(xi,rpa,'red',lw=3,label='Present/ini (Agr)')
-plt.semilogx(xi,rca,'green',lw=3,label='Present/ini (Cons)')
-plt.grid(True)
-plt.legend(loc='best')
-plt.axis((1E+08, 1E+12, 0, 1.5))
-plt.xlabel(r"E$_\nu$ (GeV)")
-plt.ylabel(r"HS1 exposure ratio")
+#rpa = yv[2,:]/exppreai  # Agressive prel to Agressive now
+#rca = yv[1,:]/exppreci  # Conservative prel to Conservative now
+#plt.figure(3)
+#plt.semilogx(xi,rpa,'red',lw=3,label='Present/ini (Agr)')
+#plt.semilogx(xi,rca,'green',lw=3,label='Present/ini (Cons)')
+#plt.grid(True)
+#plt.legend(loc='best')
+#plt.axis((1E+08, 1E+12, 0, 1.5))
+#plt.xlabel(r"E$_\nu$ (GeV)")
+#plt.ylabel(r"HS1 exposure ratio")
 
 
 ## Sensitivity limit

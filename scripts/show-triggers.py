@@ -21,8 +21,8 @@ topo = Topography(latitude=42.1, longitude=86.3, path="share/topography",
                   stack_size=49)
 
 # Load the trigger map
-file="/home/martineau/GRAND/GRAND/data/massProd/HS1/jsons.triggers.p"
-file="share/HS1flat_sel500.triggers.p"
+#file="/home/martineau/GRAND/GRAND/data/massProd/HS1/jsons.triggers.p"
+file="share/jsons_f50200.triggers.p"
 with open(file, "rb") as f:
     n, latitude, longitude, rate = pickle.load(f)
 

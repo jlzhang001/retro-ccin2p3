@@ -6,12 +6,24 @@ sys.path.append(RETRODIR)
 sys.path.append(RETRODIR+"lib/python/")
 from retro.event import EventIterator
 
+#noise = 7.9 #muV 150-200MHz
+#noise = 7.7 #muV 50-90MHz
+#noise = 12. #muV 70-150MHz
 noise = 15. #muV (minimal rms noise level on HorizonAntenna in 50-200MHz)
-step = 500.
-DISPLAY = 1
 
-    
-def checkCluster(event,antIDs,nantsmin=3):
+# Simu new
+step = 1000.
+#step = 500.
+stepini = 500.
+
+# Simu ini
+#step = 800.
+#step = 1200.
+#stepini = 400.
+
+DISPLAY = 0
+
+def checkCluster(event,antIDs,nantsmin=4):
     #print """checkCluster: check if antennas cluster.""" 
     if len(antIDs)==0:  # Empty array
       #print "Less than min ants nb above threshold."
@@ -21,7 +33,7 @@ def checkCluster(event,antIDs,nantsmin=3):
       
     bTrig = False
     ants = np.array(event["antennas"])
-    xants = np.array(ants[antIDs,0])
+    xants = ants[antIDs,0]
     yants = ants[antIDs,1]
     zants = ants[antIDs,2]
     posAnts = np.array([xants, yants, zants])
@@ -30,9 +42,10 @@ def checkCluster(event,antIDs,nantsmin=3):
         return False, []
     d = 1e12*np.ones(shape=(nAnts,nAnts))
     for i in range(nAnts):
-      for j in range(nAnts):
+      for j in range(i,nAnts):
          d[i,j]=np.linalg.norm(posAnts[:,i]-posAnts[:,j])
-    
+         d[j,i]=d[i,j]
+	 
     a = np.sort(d)
     d3rdneighbourg = a[:,nantsmin]	#  Distance of 3rd closest trigged antenna
     bCluster= d3rdneighbourg<2*step  # Antennas with 3rd neighbourgh within 2 steps
@@ -40,9 +53,9 @@ def checkCluster(event,antIDs,nantsmin=3):
     	bTrig = True;
 	
     if DISPLAY:
-      print a[:,0:4]
-      print bCluster
-      print bTrig
+      #print a[:,0:4]
+      #print bCluster
+      #print bTrig
       pl.figure(1)
       pl.scatter(xants[bCluster],yants[bCluster],marker='o',color='g')
       pl.show()
@@ -50,10 +63,12 @@ def checkCluster(event,antIDs,nantsmin=3):
       pl.close("all")
       
     return bTrig,bCluster
+    #return True,bCluster
 
 def checkCone(event):
+    #print "checkCone"
     ants = np.array(event["antennas"])
-    bAntIn = setStep(event,step)  # is it a "true" antenna pos? (ie sim with 500m step)
+    bAntIn = setStep(event,step,stepini)  # is it a "true" antenna pos? (ie sim with 500m step)
     antIDs = np.where(bAntIn)[0]  # Antenna ID
     xants = np.array(ants[antIDs,0])
     yants = ants[antIDs,1]
@@ -65,7 +80,8 @@ def checkCone(event):
     _, e, (x0, y0, z0), u, (la, lo, h), (t, p) = event["tau_at_decay"]
     posDecay = [x0,y0,z0]
     d = np.linalg.norm(posAnts-posDecay,axis=1)
-    tAntsID = antIDs[np.where(d<90000)[0]]
+    #tAntsID = antIDs[np.where(d<90000)[0]]
+    tAntsID = antIDs
     
     if DISPLAY:
       ants = np.array(event["antennas"])
@@ -79,9 +95,7 @@ def checkCone(event):
 def checkTrig(event,thresh=2):
     #print """checkTrig: determines if event trigs array. Returns list of trigged antennas.""" 
     th = thresh*noise  #
-    print "Threshold (muV) = ",th
-    print "Step (m) = ",step
-    bAntIn = setStep(event,step)  # is it a "true" antenna pos? (ie sim with 500m step)
+    bAntIn = setStep(event,step,stepini)  # is it a "true" antenna pos? (ie sim with 500m step)
     antIDs = np.where(bAntIn)[0]  # Antenna ID
     #print "len(antIDs):",len(antIDs)
     bTrig = False
@@ -121,21 +135,22 @@ def checkTrig(event,thresh=2):
       yants = ants[:,1]
       pl.figure(1)
       pl.scatter(xants[tAntsID],yants[tAntsID],marker='o',color='b')
-      pl.show()
+    
     return tAntsID
 
 #
-def setStep(event,step):
-    r = int(step/500)
+def setStep(event,step,stepini):
+    #
+    r = int(step/stepini)
     ants = np.array(event["antennas"])
     xants = np.array(ants[:,0])
-    yants = ants[:,1]
-    zants = ants[:,2]
-    alpha = ants[:,3]
+    yants = np.array(ants[:,1])
+    #zants = np.array(ants[:,2])
+    #alpha = np.array(ants[:,3])
     
-    xsteps = np.floor(xants/500)
+    xsteps = np.round(xants/stepini)
     xin = (xsteps % r == 0)
-    ysteps = np.floor(yants/500)
+    ysteps = np.round(yants/stepini)
     yin = (ysteps % r == 0)
     ain = np.logical_and(xin,yin)
     
@@ -143,7 +158,20 @@ def setStep(event,step):
       pl.figure(1)
       pl.scatter(xants,yants,marker='+',color='k')
       pl.scatter(xants[ain],yants[ain],marker='o',color='r')
-    #print "len(ain):",len(ain)
+      #print "len(ain):",len(ain)
+      #pl.figure(2)
+      #pl.subplot(211)
+      #pl.hist(xin,100)
+      #pl.subplot(212)
+      #pl.hist(yin,100)
+      #sel = np.where( (xants>-115500) & (xants<-115000) )
+      #pl.figure(3)
+      #pl.subplot(311)
+      #pl.hist(xants[sel],1000)
+      #pl.subplot(312)
+      #pl.hist(xsteps[sel],1000)
+      #pl.subplot(313)
+      #pl.hist(xin[sel],1000)
     
     return ain
     
