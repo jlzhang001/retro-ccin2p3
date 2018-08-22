@@ -10,7 +10,8 @@ from grand_tour import Topography
 from retro.event import EventIterator
 from common import checkTrig
 from common import checkCluster
-
+from common import setStep
+from common import checkCone
 
 def primary_flux(e):
     """Waxman-Bahcall bound with 1 / 3 of tau neutrinos"""
@@ -34,8 +35,13 @@ def summarise_tau(event,opt='sel'):
     heightx = zx-zg
     #print x,y,height, xx,yx,heightx
     w = [v[0] * primary_flux(v[1]) for v in event["primaries"]]
+<<<<<<< HEAD
+    wa = [v[0] * v[3] * primary_flux(v[1])  for v in event["primaries"]]
+=======
     wa = [v[0] * primary_flux(v[1] * v[3]) for v in event["primaries"]]
+>>>>>>> 022e71bf591ad1a7dcbd6b4ba4ba815f5f2fbd5b
     w = sum(w) * year / event["statistics"][1]
+    wa = sum(wa) * year / event["statistics"][1]
     n = event["statistics"][0]
     ants = np.array(event["antennas"])
     xants = ants[:,0]
@@ -45,23 +51,34 @@ def summarise_tau(event,opt='sel'):
     beta = ants[:,4]
     nc = np.shape(ants)[0]  # Number of antennas in cone
 
-    targetw = np.loadtxt('isnotintarget.txt')
+    #targetw = np.loadtxt('isnotintarget.txt')
     if opt == 'sel':  # Trigger analysis
         try:
           volts = np.array(event["voltage"])
           nv = np.shape(volts)[0]    # Number of simulated antennas
         except:
           #print "No voltage for shower",event["tag"]
-      return n, None
+          return n, None
         antsIDs = checkTrig(event)
     else:  # Only cone analysis
-    antsIDs = checkCone(event)
+        antsIDs = checkCone(event)
+	nv = len(antsIDs)
     nt = len(antsIDs)   # Nb of trigged antennas
     bTrig, bCluster = checkCluster(event,antsIDs)
     nl = sum(bCluster) # Nb of clustered antennas
 
     if bTrig and w > 0.:  # This shower triggered
         posCluster = [xants[antsIDs[bCluster]], yants[antsIDs[bCluster]],zants[antsIDs[bCluster]]]  # matrix of trigged antenna pos
+<<<<<<< HEAD
+        posDecayTile = np.transpose(np.tile(np.array([x, y, z]),(nl,1)))  # matrix of decay pos
+        dist = np.linalg.norm(posCluster-posDecayTile,axis=0)
+        dmin,dmax = np.min(dist)/1e3,np.max(dist)/1e3
+	
+    #mask = np.in1d(w,targetw)
+    #if sum(mask)>0:
+        #print event["tag"],w
+        data = [w, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl, dmin, dmax, wa]
+=======
     posDecayTile = np.transpose(np.tile(np.array([x, y, z]),(nl,1)))  # matrix of decay pos
     dist = np.linalg.norm(posCluster-posDecayTile,axis=0)
     dmin,dmax = np.min(dist)/1e3,np.max(dist)/1e3
@@ -69,8 +86,9 @@ def summarise_tau(event,opt='sel'):
     if sum(mask)>0:
       print event["tag"],w
         data = [w, wa, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, nl, dmin, dmax]
+>>>>>>> 022e71bf591ad1a7dcbd6b4ba4ba815f5f2fbd5b
     else:
-        data = [0, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, 0,0,0]
+        data = [0, e, x, y, z, la, lo, h, t, p, height, heightx, nc, nv, nt, 0,0,0,0]
     return n, data
 
 
@@ -84,8 +102,8 @@ def process(path, summarise,opt='sel'):
     novolt = 0
     for name in os.listdir(path):
         if not name.endswith("json"):
-        continue
-    filename = os.path.join(path, name)
+           continue
+        filename = os.path.join(path, name)
         t0 = time.time()
         #print "o Processing", filename
         for event in EventIterator(filename):
@@ -96,13 +114,12 @@ def process(path, summarise,opt='sel'):
         else:
           novolt += 1
           #print 'novolt=',novolt
-    if float(nf)/100 == np.floor(nf/100):
-        print 'Nb of json files processed:',nf
+        if float(nf)/100 == np.floor(nf/100):
+          print 'Nb of json files processed:',nf
 
-    nf += 1
-    #print "  --> Done in {:.1f} s".format(time.time() - t0)
+        nf += 1
         #if nf==1000:
-    #  break
+       #    break
 
     if len(data) == 0:
         raise RuntimeError("No event found")

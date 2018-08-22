@@ -61,7 +61,7 @@ def process(path,summarise,opt='sel'):
 	#print "  --> Done in {:.1f} s".format(time.time() - t0)
 	if float(nf)/100 == np.floor(nf/100):
 		print 'Nb of json files processed:',nf
-	#if nf==1000:
+	#if nf==19900:
 	#  print "#### Warning! Stopping at",nf
 	#  break
 
