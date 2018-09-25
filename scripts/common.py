@@ -13,7 +13,6 @@ noise = 15. #muV (minimal rms noise level on HorizonAntenna in 50-200MHz)
 
 # Simu new
 step = 1000.
-#step = 500.
 stepini = 500.
 
 # Simu ini
@@ -53,9 +52,10 @@ def checkCluster(event,antIDs,nantsmin=4):
     	bTrig = True;
 	
     if DISPLAY:
-      #print a[:,0:4]
-      #print bCluster
-      #print bTrig
+      print a[:,0:4]
+      print d3rdneighbourg
+      print bCluster
+      print bTrig
       pl.figure(1)
       pl.scatter(xants[bCluster],yants[bCluster],marker='o',color='g')
       pl.show()
@@ -103,7 +103,7 @@ def checkTrig(event,thresh=2):
       v = np.array(event["voltage"])
     except:
       #print "No voltage!"
-      return False,[]
+      return []
     #print "len(v)",len(v)  
     antsin = []
     Ampx=[]
@@ -126,7 +126,7 @@ def checkTrig(event,thresh=2):
     Ampxy = np.array(Ampxy)
     trigMat = np.array([Ampx>th,Ampy>th,Ampz>th,Ampxy>th*np.sqrt(2)])
     iTrig = trigMat.sum(axis=0)>0 # Vector of antenna trigger flags (Warning: <=>index of "voltage" field)
-    tAntsID =  antsin[iTrig]  # ID of trigged antennas   
+    tAntsID =  np.array(antsin[iTrig])  # ID of trigged antennas   
     ntrigs = np.sum(iTrig)  # Nb of antennas trigged in this event
     
     if DISPLAY:
@@ -134,7 +134,9 @@ def checkTrig(event,thresh=2):
       xants = np.array(ants[:,0])
       yants = ants[:,1]
       pl.figure(1)
-      pl.scatter(xants[tAntsID],yants[tAntsID],marker='o',color='b')
+      print tAntsID
+      if np.size(tAntsID)>0:
+        pl.scatter(xants[tAntsID],yants[tAntsID],marker='o',color='b')
     
     return tAntsID
 
@@ -145,20 +147,24 @@ def setStep(event,step,stepini):
     ants = np.array(event["antennas"])
     xants = np.array(ants[:,0])
     yants = np.array(ants[:,1])
+    xantsr = xants-np.min(ants[:,0])  # Local coordinates, using 1st antenna as ref, otherwise rounding does not work
+    yantsr = yants-np.min(ants[:,1])
+    #xantsr = xants
+    #yantsr = yants
     #zants = np.array(ants[:,2])
     #alpha = np.array(ants[:,3])
     
-    xsteps = np.round(xants/stepini)
+    xsteps = np.round(xantsr/stepini)
     xin = (xsteps % r == 0)
-    ysteps = np.round(yants/stepini)
+    ysteps = np.round(yantsr/stepini)
     yin = (ysteps % r == 0)
     ain = np.logical_and(xin,yin)
     
     if DISPLAY:    
       pl.figure(1)
       pl.scatter(xants,yants,marker='+',color='k')
-      pl.scatter(xants[ain],yants[ain],marker='o',color='r')
-      #print "len(ain):",len(ain)
+      pl.scatter(xants[ain],yants[ain],marker='o',color='k')
+      print "len(ain):",len(ain)
       #pl.figure(2)
       #pl.subplot(211)
       #pl.hist(xin,100)
@@ -169,7 +175,7 @@ def setStep(event,step,stepini):
       #pl.subplot(311)
       #pl.hist(xants[sel],1000)
       #pl.subplot(312)
-      #pl.hist(xsteps[sel],1000)
+      #sl.hist(xsteps[sel],1000)
       #pl.subplot(313)
       #pl.hist(xin[sel],1000)
     
