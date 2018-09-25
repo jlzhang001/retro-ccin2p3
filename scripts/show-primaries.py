@@ -35,8 +35,8 @@ def compute_spectrum(samples, weight, generated):
 def doPlots(n,x, p, dx, dp,lin='-',col="k",leg=""):
     # Show the distributions
     plt.figure(1)
-    plt.loglog(x, p * x, linestyle=lin,color=col,lw=4,label=leg)
-    #plt.errorbar(x, p * x, xerr=dx, yerr=dp * x, fmt=col+'+')
+    #plt.loglog(x, p * x, linestyle=lin,color=col,lw=4,label=leg)
+    plt.errorbar(x, p * x, xerr=dx, yerr=dp * x, fmt=col+'+')
     plt.xlabel(r"energy, E$_\nu$ (GeV)")
     plt.ylabel(r"E$_\nu \times$ rate (yr$^{-1}$)")
     plt.axis((3E+07, 1E+12, 1E-03, 1E+01))
@@ -72,14 +72,18 @@ def getRate(pfile):
     return n, data
 
 if DISPLAY == 1:  # HS1 final
-  files = ["share/HS1ground.primaries.5ants.2s.full.090818","share/HS1ground.primaries.5ants.2s.f50200.090818","share/HS1ground.primaries.5ants.3s.f50200.090818","share/HS1ground.primaries.5ants.5s.f50200.090818"]
-  leg = ['Ground Full Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)']
-  col = ["b","b",'magenta','cyan']
-  lin = ["-","--",'-','-']
-  
+  files = ["share/HS1ground.primaries.5ants.2s.full.090818","share/HS1ground.primaries.5ants.2s.f50200.090818.fixCluster","share/HS1ground.primaries.5ants.3s.f50200.090818","share/HS1ground.primaries.5ants.5s.f50200.090818","share/HS1ground.primaries.5ants.2s.f50200.090818.1500m"]
+  leg = ['Ground Full Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)','1500m step']
+  col = ["b","b",'magenta','cyan',"orange"]
+  lin = ["--","-",'-','-',"-"]
+  files = ["share/simu60kcone.primaries.5ants.agr.800m.v2","share/simu60kcone.primaries.5ants.agr.800m.v3"]
+  leg = ['200m topography step','400m topography step','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)','1500m step']
+  col = ["b","r"]
+  lin = ["-","-"]
+   # 1st limit
 if DISPLAY == 2:  # Free space vs ground
-  files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1freespace.primaries.5ants.2s.noAtt.50200","share/HS1ground.primaries.5ants.2s.50200","share/HS1ground.primaries.5ants.2s.full.090818","share/HS1ground.primaries.5ants.2s.f50200.090818","share/HS1ground.primaries.5ants.3s.f50200.090818","share/HS1ground.primaries.5ants.5s.f50200.090818"]
-  col = ["g","g","b","k","k","r","r"]
+  files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1freespace.primaries.5ants.2s.noAtt.50200","share/HS1ground.primaries.5ants.2s.50200","share/HS1ground.primaries.5ants.2s.full.090818","share/HS1ground.primaries.5ants.2s.f50200.090818","share/HS1ground.primaries.5ants.3s.f50200.090818"]
+  col = ["g","g","b","k","k","r","r",]
   lin = ["-","--","-","--","-","-","--"]
   leg = ['Free space + att 50-200MHz May 21 (2$\sigma$ th)' ,'Free space + No att 50-200MHz May 21 (2$\sigma$ th)','Ground 50-200MHz May 21(2$\sigma$ th)','Ground Full Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)']
   
@@ -180,17 +184,17 @@ if DISPLAY<5:
 #  plt.loglog(xi,exppreci,'-.',color = 'magenta',lw=4,label="HS1 ini (Cons)")
 plt.legend(loc='best')
 plt.savefig("exposure.png")
-
-#rpa = yv[2,:]/exppreai  # Agressive prel to Agressive now
-#rca = yv[1,:]/exppreci  # Conservative prel to Conservative now
-#plt.figure(3)
-#plt.semilogx(xi,rpa,'red',lw=3,label='Present/ini (Agr)')
-#plt.semilogx(xi,rca,'green',lw=3,label='Present/ini (Cons)')
-#plt.grid(True)
-#plt.legend(loc='best')
-#plt.axis((1E+08, 1E+12, 0, 1.5))
-#plt.xlabel(r"E$_\nu$ (GeV)")
-#plt.ylabel(r"HS1 exposure ratio")
+if 0:
+  rpa = yv[4,:]/yv[1,:]  # 1500M vs 1000m
+  #rca = yv[1,:]/exppreci  # Conservative prel to Conservative now
+  plt.figure(3)
+  plt.semilogx(xi,rpa*2.25,'k',lw=3,label='1500m/1000m for 10000 ants')
+  #plt.semilogx(xi,rca,'green',lw=3,label='Present/ini (Cons)')
+  plt.grid(True)
+  plt.legend(loc='best')
+  plt.axis((1E+08, 1E+12, 0, 1.5))
+  plt.xlabel(r"E$_\nu$ (GeV)")
+  plt.ylabel(r"HS1 exposure ratio")
 
 
 ## Sensitivity limit
