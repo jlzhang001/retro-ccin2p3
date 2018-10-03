@@ -36,10 +36,12 @@ from grand_tour import Topography
 #from display import Display  # Not used anymore
 sys.path.append("/home/martineau/GRAND/soft/neutrinos/retro/lib/python")
 from display_omh import DisplayOMH # in /home/martineau/GRAND/soft/neutrinos/retro/lib/python
+from displayHS1 import displayHS1 # in /home/martineau/GRAND/soft/neutrinos/retro/lib/python
 import pylab as pl
 import numpy as np
 
-display = DisplayOMH()
+#display = DisplayOMH()
+display = displayHS1()
 
 def ants(event):
 
@@ -100,7 +102,8 @@ if __name__ == "__main__":
 	    #xa,ya = ants(event)
 	    #xall = np.append(xall,xa)
 	    #yall = np.append(yall,ya)
-	    display(event)
+	    #display(event)
+	    display(42.1,86.3)
 	    #fresnel(event)
 	    #dumpIni(event)
 	    

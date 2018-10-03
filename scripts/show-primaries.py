@@ -9,7 +9,7 @@ import cPickle as pickle
 
 import numpy
 import matplotlib.pyplot as plt
-DISPLAY = 1
+DISPLAY = 6
 dur = 3 # years
 plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
@@ -35,8 +35,8 @@ def compute_spectrum(samples, weight, generated):
 def doPlots(n,x, p, dx, dp,lin='-',col="k",leg=""):
     # Show the distributions
     plt.figure(1)
-    #plt.loglog(x, p * x, linestyle=lin,color=col,lw=4,label=leg)
-    plt.errorbar(x, p * x, xerr=dx, yerr=dp * x, fmt=col+'+')
+    plt.loglog(x, p * x, linestyle=lin,color=col,lw=4,label=leg)
+    #plt.errorbar(x, p * x, xerr=dx, yerr=dp * x, fmt=col+'+')
     plt.xlabel(r"energy, E$_\nu$ (GeV)")
     plt.ylabel(r"E$_\nu \times$ rate (yr$^{-1}$)")
     plt.axis((3E+07, 1E+12, 1E-03, 1E+01))
@@ -45,7 +45,7 @@ def doPlots(n,x, p, dx, dp,lin='-',col="k",leg=""):
     norm = 1. / primary_flux(x)
     y, dy = p * norm, dp * norm
     plt.loglog(x, y, color=col,linestyle=lin,lw=4,label=leg)
-    #plt.errorbar(x, y, xerr=dx, yerr=dy, fmt=col+'+')
+    #plt.errorbar(x, y, xerr=dx, yerr=dy, fmt=col+'+',label=leg)
     plt.xlabel(r"E$_\nu$ (GeV)")
     plt.ylabel(r"1-year exposure (cm$^2$ s sr)")
     plt.axis((3E+07, 1E+12, 1E+15, 5E+18))
@@ -76,10 +76,19 @@ if DISPLAY == 1:  # HS1 final
   leg = ['Ground Full Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (2$\sigma$ th)','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)','1500m step']
   col = ["b","b",'magenta','cyan',"orange"]
   lin = ["--","-",'-','-',"-"]
-  files = ["share/simu60kcone.primaries.5ants.agr.800m.v2","share/simu60kcone.primaries.5ants.agr.800m.v3"]
-  leg = ['200m topography step','400m topography step','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)','1500m step']
-  col = ["b","r"]
-  lin = ["-","-"]
+  files = ["share/HS1ground.primaries.5ants.2s.f50200.090818","share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1ground.primaries.5ants.5s.f50200.090818","share/flat_freespace.primaries.5ants.2s.v2.50200"]
+  leg = ['HS1 (th = 30 $\mu$V)','HS1 analytical att. (th = 30 $\mu$V)','HS1 (th = 75 $\mu$V)','Flat array (th = 30 $\mu$V)']
+  col = ["b","m","g","r"]
+  lin = ["-","--","-","-"]
+
+  #files = ["share/simu60kcone.primaries.5ants.agr.800m.v2","share/simu60kcone.primaries.5ants.agr.800m.v3"]
+  #leg = ['200m topography step','400m topography step','Ground 50-200MHz Aug 08 (3$\sigma$ th)','Ground 50-200MHz Aug 08 (5$\sigma$ th)','1500m step']
+  #col = ["b","r"]
+  #lin = ["-","-"]
+  #files = ["share/HS1ground.primaries.5ants.2s.full.090818","share/jsons.primaries_sel.p"]
+  #leg = ['090818','170918']
+  #col = ["b","r"]
+  #lin = ["-","-"]
    # 1st limit
 if DISPLAY == 2:  # Free space vs ground
   files = ["share/HS1freespace.primaries.5ants.2s.v2.50200","share/HS1freespace.primaries.5ants.2s.noAtt.50200","share/HS1ground.primaries.5ants.2s.50200","share/HS1ground.primaries.5ants.2s.full.090818","share/HS1ground.primaries.5ants.2s.f50200.090818","share/HS1ground.primaries.5ants.3s.f50200.090818"]
@@ -107,6 +116,11 @@ if DISPLAY == 5: # 60000km2 area
   col = ["k","k","k","g","r","b","b","b",'magenta','cyan']
   lin = ["--","-",":","-",'-',":","-","--",'-','-','-']
   leg = ['60k cone ana 800m June 1st (5 ants)','60k cone ana 800m June 22nd (5 ants)','60k cone ana 800m June 22d (noclust)',"60k RM June 22nd (2$\sigma$ th)","60k RM July 8 (2$\sigma$ th)",'60k cone presel 1000m Aug 08 (5 ants)','60k RM Aug 08 (2$\sigma$ th)','60k RM 50-200MHz Aug 08 (2$\sigma$ th)','60k RM 50-200MHz Aug 08 (3$\sigma$ th)','60k RM 50-200MHz Aug 08 (5$\sigma$ th)']
+if DISPLAY == 6: # tests
+  files = ["share/HS1ground.primaries.5ants.2s.f50200.090818","share/jsons.primaries_sel.p"]
+  leg = ['HS1 17092018  (th = 30 $\mu$V)','HS1 25092018 (th = 30 $\mu$V)']
+  col = ["k","b","b",'k','k','g','g',"b"]
+  lin = ["-","-","--","-","--",'-','--',":"]
   
 yv = numpy.zeros([len(files),50])
 for i in range(len(files)):
@@ -115,6 +129,7 @@ for i in range(len(files)):
     x, p, dx, dp = compute_spectrum(data[:, 1], data[:, 0], n)
     xi,yv[i,:] = doPlots(n,x, p, dx, dp,lin[i],col[i],leg[i])   
     plt.legend(loc='best')
+    plt.title("HotSpot 1")
     
     # Compute integral limit
     y = p/primary_flux(x)
@@ -128,20 +143,10 @@ for i in range(len(files)):
     dlim = 2.44*x/(numpy.log(10)*y*dur)*3  # All flavor
     dlim200k = dlim/20  # 
     plt.figure(17)
-#    if i == 0:
-      #plt.loglog(x,dlim,linestyle="--",color="k",lw=4,label="60k cone new 800m June 1st (5 ants)")
-#      plt.loglog(x,dlim200k,linestyle="-",color="orange",lw=4,label="GRAND200k (2$\sigma$ th)")
-#      print x,dlim200k
-    if i == 1:
-#      plt.loglog(x,dlim200k,linestyle="-",color="green",lw=4,label="GRAND200k (5$\sigma$ th)")
-      plt.loglog(x,dlim,linestyle="-",color="k",lw=4,label="60k cone new 800m June 22nd (5 ants)")
-#    if i == 3:
-#      plt.loglog(x,dlim,linestyle="-",color="b",lw=4,label="60k RM July 8 (agr)")
-#      plt.loglog(x,dlim200k,linestyle="--",color="brown",lw=4,label="GRAND200k - flat(2$\sigma$ th)")
-    if i == 4:
-      plt.loglog(x,dlim,linestyle="-",color="b",lw=4,label="60k RM July 8 50-200MHz (agr)")
-            
-    if i == 4:
+    plt.loglog(x,dlim,linestyle=lin[i],color=col[i],lw=4,label=leg[i])
+    print x,dlim
+
+    if i == len(files)-1:
       eHS1ini = 1.0e+11 *numpy.array([0.0030, 0.0038, 0.0048, 0.0060, 0.0075, 0.0095, 0.0119, 0.0150, 0.0189, 0.0238, 0.0300, 0.0378, 0.0475, 0.0599, 0.0754, 0.0949, 0.1194, 0.1504, 0.1893, 0.2383, 0.3000, 0.3777, 0.4755, 0.5986, 0.7536, 0.9487, 1.1943, 1.5036, 1.8929, 2.3830, 3.0000, 3.7768, 4.7547, 5.9858, 7.5357, 9.4868])
       lHS1ini = 1.0e-05 *numpy.array([0.0012, 0.0011, 0.0010, 0.0010, 0.0010, 0.0011, 0.0012, 0.0013, 0.0014, 0.0016, 0.0018, 0.0021, 0.0025, 0.0029, 0.0034, 0.0040, 0.0047, 0.0055, 0.0065, 0.0077, 0.0092, 0.0109, 0.0129, 0.0154, 0.0185, 0.0222, 0.0268, 0.0326, 0.0399, 0.0491, 0.0611, 0.0767, 0.0973, 0.1249, 0.1623, 0.2136])
       eGRANDini = 1.0e+11 *numpy.array([0.0010, 0.0013, 0.0016, 0.0020, 0.0025,0.0032, 0.0040, 0.0050, 0.0063, 0.0079, 0.0100, 0.0126, 0.0158, 0.0200, 0.0251, 0.0316, 0.0398, 0.0501, 0.0631, 0.0794, 0.1000, 0.1259, 0.1585, 0.1995, 0.2512, 0.3162, 0.3981, 0.5012, 0.6310, 0.7943, 1.0000, 1.2589, 1.5849, 1.9953, 2.5119, 3.1623, 3.9811, 5.0119, 6.3096, 7.9433])
@@ -151,13 +156,6 @@ for i in range(len(files)):
       e60kini1200 = 1.0e+11*numpy.array([0.0010, 0.0013, 0.0016, 0.0020, 0.0025, 0.0032, 0.0040, 0.0050, 0.0063, 0.0079, 0.0100, 0.0126, 0.0158, 0.0200, 0.0251, 0.0316, 0.0398, 0.0501, 0.0631, 0.0794, 0.1000, 0.1259, 0.1585, 0.1995, 0.2512, 0.3162, 0.3981, 0.5012, 0.6310, 0.7943, 1.0000, 1.2589, 1.5849, 1.9953, 2.5119, 3.1623, 3.9811, 5.0119, 6.3096, 7.9433])
       sim60kini1200 = 1.0e-06*numpy.array([0.0384, 0.0203, 0.0123, 0.0083, 0.0062, 0.0050, 0.0044, 0.0041, 0.0040, 0.0040, 0.0042, 0.0045, 0.0049, 0.0055, 0.0061, 0.0070, 0.0080, 0.0091, 0.0105, 0.0122, 0.0141, 0.0164, 0.0191, 0.0224, 0.0263, 0.0311, 0.0369, 0.0439, 0.0526, 0.0632, 0.0761, 0.0917, 0.1104, 0.1323, 0.1573, 0.1846, 0.2126, 0.2388, 0.2595, 0.2704])
 
-
-      if DISPLAY==5:
-        plt.loglog(e60kini,sim60kini,linestyle='--',color="brown",lw=4,label="60k ini (agr)")
-      else:
-        plt.loglog(eHS1ini,lHS1ini,linestyle='--',color="b",lw=4,label="HS1 ini (agr)")
-      #plt.loglog(e60kini1200,sim60kini1200,linestyle='--',color="r",lw=4,label="60k ini (agr) - 1200m")
-      #plt.loglog(eGRANDini,lGRANDini,linestyle='--',color="orange",lw=4,label="GRAND200k ini (agr)")
       plt.xlabel(r"E$_\nu$ (GeV)")
       plt.ylabel(r"E$^2\Phi(E)$ limit (GeV/s/cm$^{2}$/sr)")
       plt.axis((3E+07, 1E+12, 1E-10, 1E-05))
@@ -177,9 +175,10 @@ exppreci = exppreci/fact
 plt.figure(1)
 plt.legend(loc='best')
 plt.savefig("primaries-rate.png")
+
 plt.figure(2)
 if DISPLAY<5:
-  plt.loglog(xi,exppreai,'-.',color='brown',lw=4,label="HS1 ini (agr)")
+  plt.loglog(xi,exppreai,'-.',color='w',lw=0)  # Keep this plot to maintain loglog scale
 #if DISPLAY==1:
 #  plt.loglog(xi,exppreci,'-.',color = 'magenta',lw=4,label="HS1 ini (Cons)")
 plt.legend(loc='best')

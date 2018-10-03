@@ -19,7 +19,7 @@ from grand_tour import Topography
 def plot_histogram(samples, weight, generated, plot=plt.plot, col="k", figID=1, factor=None):
     """Plot a 1D histogram of sampled values"""
     if plot == plt.loglog:
-        n, b = numpy.histogram(numpy.log(samples), 40,
+        n, b = numpy.histogram(numpy.log(samples), 15,
                                weights=weight / generated)
         n2, _ = numpy.histogram(numpy.log(samples), b,
                                 weights=weight**2 / generated)
@@ -29,15 +29,15 @@ def plot_histogram(samples, weight, generated, plot=plt.plot, col="k", figID=1, 
         b = numpy.exp(b)
         xerr = (x - b[:-1], b[1:] - x)
     else:
-        n, b = numpy.histogram(samples, 40, weights=weight / generated)
+        n, b = numpy.histogram(samples, 60, weights=weight / generated)
         n2, _ = numpy.histogram(samples, b, weights=weight**2 / generated)
         x = 0.5 * (b[1:] + b[:-1])
         xerr = x[1] - x[0]
         norm = 1. / xerr
     p = n * norm
     dp = numpy.sqrt((n2 - n * n) / generated) * norm
-
     plt.figure(figID)
+    plt.grid(True)
     if factor is None:
         y = p
         yerr = dp
@@ -48,6 +48,10 @@ def plot_histogram(samples, weight, generated, plot=plt.plot, col="k", figID=1, 
     if sum(y) > 0:
         plot(x, y, col + "o")
         plt.errorbar(x, y, xerr=xerr, yerr=yerr, fmt=col + "o")
+    
+    print 'Fig.',figID,', integral=',numpy.trapz(y,x)
+    if figID==3:
+      print 'Fig.',figID,', integral for x>0=',numpy.trapz(y[x>0],x[x>0])
     return x, p
 
 
@@ -76,7 +80,8 @@ def doPlots(n, data, col="k"):
     plt.xlabel(r"energy limit, E$_\tau$ (GeV)")
     plt.ylabel(r"ratio")
     plt.savefig("tau-ratio.png")
-
+    
+    print data[:, 0],data[:, 18]
     plot_histogram(90-data[:, 8], data[:, 0], n, col=col, figID=3)
     #plot_histogram(90-data[:, 8], data[:, 18], n, figID=3, col="r")
     #plt.axis((-4., 95., 0., 6.))
@@ -84,10 +89,10 @@ def doPlots(n, data, col="k"):
     plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
     plt.xlabel(r"Elevation angle (deg)")
     plt.ylabel(r"rate (deg$^{-1}$ yr$^{-1}$)")
+    plt.title("HotSpot 1")
     plt.savefig("tau-zenith.png")
 
     plot_histogram(data[:, 9], data[:, 0], n, col=col, figID=4)
-    print data[:, 9]
     plt.xticks(numpy.linspace(0., 360., 5))
     #plt.axis((-200., 200., 0., 1E-01))
     #plt.yticks(numpy.linspace(0., 1E-01, 5))
