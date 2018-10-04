@@ -13,7 +13,11 @@ from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from scipy import stats
+from scipy.optimize import curve_fit
 from grand_tour import Topography
+
+
+fit_model = "log-polynomial"
 
 
 def plot_histogram(samples, weight, generated, plot=plt.plot, col="k", figID=1, factor=None):
@@ -29,7 +33,7 @@ def plot_histogram(samples, weight, generated, plot=plt.plot, col="k", figID=1, 
         b = numpy.exp(b)
         xerr = (x - b[:-1], b[1:] - x)
     else:
-        n, b = numpy.histogram(samples, 60, weights=weight / generated)
+        n, b = numpy.histogram(samples, 15, weights=weight / generated)
         n2, _ = numpy.histogram(samples, b, weights=weight**2 / generated)
         x = 0.5 * (b[1:] + b[:-1])
         xerr = x[1] - x[0]
@@ -48,11 +52,11 @@ def plot_histogram(samples, weight, generated, plot=plt.plot, col="k", figID=1, 
     if sum(y) > 0:
         plot(x, y, col + "o")
         plt.errorbar(x, y, xerr=xerr, yerr=yerr, fmt=col + "o")
-    
+
     print 'Fig.',figID,', integral=',numpy.trapz(y,x)
     if figID==3:
       print 'Fig.',figID,', integral for x>0=',numpy.trapz(y[x>0],x[x>0])
-    return x, p
+    return x, p, dp
 
 
 # Show the distributions
@@ -60,8 +64,8 @@ plt.style.use("deps/mplstyle-l3/style/l3.mplstyle")
 
 
 def doPlots(n, data, col="k"):
-    
-    x, p = plot_histogram(data[:, 1], data[:, 0], n, figID=1, plot=plt.loglog, col=col)
+
+    x, p, _ = plot_histogram(data[:, 1], data[:, 0], n, figID=1, plot=plt.loglog, col=col)
     #xa, pa = plot_histogram(data[:, 1], data[:, 18], n, figID=1, plot=plt.loglog, col="r")
     plt.xlabel(r"energy, E$_\tau$ (GeV)")
     plt.ylabel(r"E$_\tau \times$ rate (yr$^{-1}$)")
@@ -73,22 +77,35 @@ def doPlots(n, data, col="k"):
     plt.xlabel(r"energy, E$_\tau$ (GeV)")
     plt.ylabel(r"Atm/Ground")
     plt.savefig("tau-ratio.png")
-        
 
     plt.figure(2)
     #plt.semilogx(x, cumtrapz(p, x, initial=0.) / numpy.trapz(p, x), color=col)
     plt.xlabel(r"energy limit, E$_\tau$ (GeV)")
     plt.ylabel(r"ratio")
     plt.savefig("tau-ratio.png")
-    
+
     print data[:, 0],data[:, 18]
-    plot_histogram(90-data[:, 8], data[:, 0], n, col=col, figID=3)
+    x, p, dp = plot_histogram(90-data[:, 8], data[:, 0], n, col=col, figID=3)
+    mu = numpy.trapz(x * p, x)
+    sigma = numpy.sqrt(numpy.trapz((x - mu)**2 * p, x))
+    rate = numpy.trapz(p, x)
+
+    K = (p > 0) & (dp > 0)
+    xx = numpy.linspace(x[0], x[-1], 101)
+    if fit_model == "Gaussian":
+        p1, _ = curve_fit(stats.norm.pdf, x[K], p[K] / rate, p0=(mu, sigma))
+        plt.plot(xx, rate * stats.norm.pdf(xx, *p1), "r")
+    else:
+        p1 = numpy.polyfit(x[K], numpy.log(p[K]), 4, w=numpy.log(p[K] / dp[K]))
+        plt.plot(xx, numpy.exp(numpy.polyval(p1, xx)), "r-")
+
     #plot_histogram(90-data[:, 8], data[:, 18], n, figID=3, col="r")
     #plt.axis((-4., 95., 0., 6.))
     plt.xlim(-5., 5.)
+    plt.grid(False)
     plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
     plt.xlabel(r"Elevation angle (deg)")
-    plt.ylabel(r"rate (deg$^{-1}$ yr$^{-1}$)")
+    plt.ylabel(r"Differential rate (deg$^{-1}$ yr$^{-1}$)")
     plt.title("HotSpot 1")
     plt.savefig("tau-zenith.png")
 
@@ -169,7 +186,7 @@ for i in range(len(files)):
   nclust = data[:,15]
   dmin = data[:,16]
   dmax = data[:,17]
-  
+
   plt.figure(17)
   plt.subplot(221)
   plt.hist(dmin[dmin>0],100)
@@ -185,9 +202,9 @@ for i in range(len(files)):
   plt.plot(theta[dmin>0],dmax[dmax>0],'ob')
   plt.xlabel(r"zenith, $\theta_\tau$ (deg)")
   plt.ylabel('Dmax (km)')
-  
+
   print "Nb events with antennas further than 90km:",sum(dmin>90)
-  
+
   plt.figure(23)
   plt.title('$N_{ants}$ in events (with 1+ voltage')
   plt.subplot(411)
@@ -203,14 +220,14 @@ for i in range(len(files)):
   plt.xlabel(r"$log_{10}(N_{RadioSim}^*)$")
   print "Radio sim stats: [N,minAnts,maxAnts,<Ants>]",len(nvolts[nvolts>0]),numpy.min(nvolts[nvolts>0]),numpy.max(nvolts[nvolts>0]),numpy.mean(nvolts[nvolts>0])
   print "Radio sim stats (events with 5+ ants): [N,minAnts,maxAnts,<Ants>]",len(nvolts[nvolts>4]),numpy.min(nvolts[nvolts>4]),numpy.max(nvolts[nvolts>4]),numpy.mean(nvolts[nvolts>4])
-  
+
   plt.subplot(413)
   plt.hist(numpy.log10(ntrigs[ntrigs>0]),100)
   #plt.xlim(0.1,max(numpy.log10(ncones)))
   plt.xlabel(r"$log_{10}(N_{Trig})$")
   print "Trigged events stats: [N,minAnts,maxAnts,<Ants>]",len(ntrigs[ntrigs>0]),numpy.min(ntrigs[ntrigs>0]),numpy.max(ntrigs[ntrigs>0]),numpy.mean(ntrigs[ntrigs>0])
   print "Trigged events stats (events with 5+ ants): [N,minAnts,maxAnts,<Ants>]",len(ntrigs[ntrigs>4]),numpy.min(ntrigs[ntrigs>4]),numpy.max(ntrigs[ntrigs>4]),numpy.mean(ntrigs[ntrigs>4])
-    
+
   plt.subplot(414)
   plt.hist(numpy.log10(nclust[nclust>0]),100)
   #plt.xlim(0.1,max(numpy.log10(ncones)))
@@ -218,9 +235,9 @@ for i in range(len(files)):
   print "Clustered events stats: [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>0]),numpy.min(nclust[nclust>0]),numpy.max(nclust[nclust>0]),numpy.mean(nclust[nclust>0])
   print "Clustered events stats (events with 4+ ants): [N,minAnts,maxAnts,<Ants>]",len(nclust[nclust>3]),numpy.min(nclust[nclust>3]),numpy.max(nclust[nclust>3]),numpy.mean(nclust[nclust>3])
 
-  # Print the total rate  
+  # Print the total rate
   print n,sum(data[:,0]>0),sum(data[:,0])
-  mu = sum(data[:,0]) / n 
+  mu = sum(data[:,0]) / n
   sigma = sum(data[:,0]**2) / n
   sigma = numpy.sqrt((sigma - mu**2) / n)
   print "Rate = {:.3f} +-{:.3f} yr^-1".format(mu, sigma)
@@ -229,12 +246,12 @@ for i in range(len(files)):
 
   plt.figure()
   w = data[:,0]
-  if i==0:  
+  if i==0:
     wref = w
   #if i==1:
   #  wtarget = w
   plt.hist(w,100)
   print len(w[w>0]),numpy.mean(w[w>0]),numpy.median(w[w>0])
-  
+
   #print len(numpy.intersect1d(wref, wtarget)), len(numpy.setdiff1d(wref, wtarget)), len(numpy.setdiff1d(wtarget, wref))
 plt.show()
