@@ -18,7 +18,7 @@
 #$ -t 1-20
 
 # CPU time
-#$ -l ct=12:00:00
+#$ -l ct=48:00:00
 
 # Memory
 #$ -l h_rss=4.0G
@@ -45,10 +45,12 @@ import ccin2p3
 
 # Settings
 ARRAY_SIZE = 66.5E+03, 150.4E+03
+ANTENNA_SPACING = 500.
 ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "5f5bc54"
+RETRO_HASHTAG = "d468302"
 N_EVENTS = 1000
-OUTDIR = "irods://grand/test/flat-sel4"
+SELECTOR_SETUP = "3deg"
+OUTDIR = "irods://grand/sim/flat-150x67km2/" + RETRO_HASHTAG + "/taus"
 
 topography = {
     "latitude" : 42.1,
@@ -86,7 +88,7 @@ options = {
 import grand_tour
 topo = grand_tour.Topography(**options["topography"])
 
-dc = 500.
+dc = ANTENNA_SPACING
 nx, ny = map(lambda x: int(x / dc) + 1, ARRAY_SIZE)
 setup = []
 for i in xrange(ny):

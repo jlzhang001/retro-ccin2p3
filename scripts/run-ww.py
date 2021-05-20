@@ -5,11 +5,11 @@
 # Submit job under TREND group
 #$ -P P_trend
 
+# The job name
+#$ -N retro-ww
+
 # Merge the stdout et stderr in a single file
 #$ -j y
-
-# The job name
-#$ -N hotspot
 
 # Files .e et .o copied to current working directory
 #$ -cwd
@@ -18,10 +18,10 @@
 #$ -notify
 
 # Job array indices
-#$ -t 1-100
+#$ -t 1
 
 # CPU time
-#$ -l ct=48:00:00
+#$ -l ct=12:00:00
 
 # Memory
 #$ -l h_rss=4.0G
@@ -47,77 +47,54 @@ import time
 import ccin2p3
 
 # Settings
-ARRAY_SIZE = ((-33.25E+03, 43.25E+03), (-55.52E+03, 75.2E+03))
-ANTENNA_SPACING = 500.
-ANTENNA_HEIGHT = 4.5
-RETRO_HASHTAG = "d468302"
-N_EVENTS = 200
-SELECTOR_SETUP = "3deg"
-OUTDIR = "irods://grand/sim/hotspot-130x77km2/taus"
+SETUP = (500., 4.5)
+RETRO_HASHTAG = "cfdecde"
+N_EVENTS = 10000
+OUTDIR = "irods://grand/test/tau-ww"
 
-DEM = "SRTMGL1"
 topography = {
-    "latitude" : 42.1,
-    "longitude" : 86.3,
+    "latitude" : 42.0,
+    "longitude" : 86.0,
     "density" : 2.65E+03,
     "path" : "topography",
-    "stack_size" : 144 }
+    "stack_size" : 50 }
 
 
 # Install RETRO
 print "# Installing RETRO ..."
 t0 = time.time()
 rootdir, tmpdir, tag = ccin2p3.retro_install(hashtag=RETRO_HASHTAG,
-                                             topography=(topography, 5, 6),
-                                             dem=DEM)
+                                             topography=(topography, 5, 6))
 print "  --> Done in {:.1f} s".format(time.time() - t0)
 
 
 # Generate the configuration card
-delta = 300E+03
-sx, sy = map(lambda x: (x[0] - delta, x[1] + delta), ARRAY_SIZE)
 options = {
     "generator" : { "theta" : ["uniform", [85.0, 95.0]],
                     "energy" : [10**7.5, 10**10.5],
-                    "position" : [sx, sy, [0, 5E+03]] },
+                    "position" : ["geodetic",
+                                  [[-0.5, 0.5],
+                                   [-0.5, 0.5],
+                                   [0, 5E+03]]] },
     "topography" : topography,
 
     "selector" : {
-        "setup" : { "cone" : SELECTOR_SETUP, "xmax": False },
         "vertex": { "limit": 4.0 }},
 
     "primary": {
         "events": 10000,
         "requested": 100,
-        "longitudinal": False}}
+        "longitudinal": False },
 
+    "setup": {
+        "path": "ww://{:.0f}/{:.2f}".format(*SETUP) }}
 
-# Generate the antenna setup
-import grand_tour
-opts = topography.copy()
-del opts["density"]
-topo = grand_tour.Topography(**opts)
-
-dc = ANTENNA_SPACING
-nx, ny = map(lambda x: int((x[1] - x[0]) / dc) + 1, ARRAY_SIZE)
-setup = []
-for i in xrange(ny):
-    yi = ARRAY_SIZE[1][0] + i * dc
-    for j in xrange(nx):
-        xj = ARRAY_SIZE[0][0] + j * dc
-        uij, alpha, beta = topo.ground_normal(xj, yi, step=200.,
-            angles=True)
-        zij = topo.ground_altitude(xj, yi)
-        setup.append((xj + uij[0] * ANTENNA_HEIGHT,
-                      yi + uij[1] * ANTENNA_HEIGHT,
-                      zij + uij[2] * ANTENNA_HEIGHT,
-                      alpha, beta))
 
 # Run RETRO
 print ""
 print "# Running RETRO ..."
 t0 = time.time()
 outfile = "events.{:}.json".format(tag)
-ccin2p3.retro_run(N_EVENTS, options, setup, path=os.path.join(
+ccin2p3.retro_run(N_EVENTS, options, path=os.path.join(
     OUTDIR, outfile))
 print "  --> Done in {:.1f} s".format(time.time() - t0)

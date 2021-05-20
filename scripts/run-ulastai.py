@@ -9,7 +9,7 @@
 #$ -j y
 
 # The job name
-#$ -N hotspot
+#$ -N ulastai
 
 # Files .e et .o copied to current working directory
 #$ -cwd
@@ -18,7 +18,7 @@
 #$ -notify
 
 # Job array indices
-#$ -t 1-100
+#$ -t 2-100
 
 # CPU time
 #$ -l ct=48:00:00
@@ -35,7 +35,7 @@
 # Request access to iRODS and /sps
 #$ -l irods=1,sps=1
 #===============================================================================
-"""Generate tau decays for the hotspot array of 66x150 km2
+"""Generate tau decays for the ulastai setup
 """
 
 import sys
@@ -47,28 +47,28 @@ import time
 import ccin2p3
 
 # Settings
-ARRAY_SIZE = ((-33.25E+03, 43.25E+03), (-55.52E+03, 75.2E+03))
-ANTENNA_SPACING = 500.
+ARRAY_SIZE = ((-120E+03, 100E+03), (-150E+03, 120E+03))
+ANTENNA_SPACING = 400.
 ANTENNA_HEIGHT = 4.5
 RETRO_HASHTAG = "d468302"
 N_EVENTS = 200
-SELECTOR_SETUP = "3deg"
-OUTDIR = "irods://grand/sim/hotspot-130x77km2/taus"
+SELECTOR_SETUP = "agressive"
+OUTDIR = "irods://grand/test/ulastai-full-{:}-400m".format(SELECTOR_SETUP)
 
 DEM = "SRTMGL1"
 topography = {
-    "latitude" : 42.1,
-    "longitude" : 86.3,
+    "latitude" : 42.92433,
+    "longitude" : 86.69817,
     "density" : 2.65E+03,
     "path" : "topography",
-    "stack_size" : 144 }
+    "stack_size" : 50 }
 
 
 # Install RETRO
 print "# Installing RETRO ..."
 t0 = time.time()
 rootdir, tmpdir, tag = ccin2p3.retro_install(hashtag=RETRO_HASHTAG,
-                                             topography=(topography, 5, 6),
+                                             topography=(topography, 8, 9),
                                              dem=DEM)
 print "  --> Done in {:.1f} s".format(time.time() - t0)
 

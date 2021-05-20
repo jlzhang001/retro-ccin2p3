@@ -9,7 +9,8 @@ import subprocess
 import sys
 import time
 
-TOPO_PATH = "/sps/hep/trend/neu/maps/ASTER-GDEM2"
+TOPO_PATH = { "ASTER" : "/sps/trend/neu/maps/ASTER-GDEM2",
+              "SRTMGL1" : "/sps/trend/niess/SRTMGL1.003" }
 
 def system(cmd, mute=False):
     """Run a system command
@@ -24,7 +25,7 @@ def system(cmd, mute=False):
     return out
 
 
-def retro_install(path=None, topography=None, hashtag=None):
+def retro_install(path=None, topography=None, hashtag=None, dem="ASTER"):
     """Install RETRO locally
     """
 
@@ -70,9 +71,13 @@ def retro_install(path=None, topography=None, hashtag=None):
                 lng = lng0 + j
                 if lng >= 0: ew = "E"
                 else: ew = "W"
-                path = os.path.join(TOPO_PATH,
-                    "ASTGTM2_{:}{:02d}{:}{:03d}_dem.tif".format(
-                        sn, lat, ew, lng))
+                if dem == "ASTER":
+                    filename = "ASTGTM2_{:}{:02d}{:}{:03d}_dem.tif".format(
+                        sn, lat, ew, lng)
+                else:
+                    filename = "{:}{:02d}{:}{:03d}.SRTMGL1.hgt".format(
+                        sn, lat, ew, lng)
+                path = os.path.join(TOPO_PATH[dem], filename)
                 shutil.copy(path, topography["path"])
 
     # Build the worker tag
