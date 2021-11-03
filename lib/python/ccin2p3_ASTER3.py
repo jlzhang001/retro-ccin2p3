@@ -20,8 +20,7 @@ def system(cmd, mute=False):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
     out, err = p.communicate()
-                         stderr=subprocess.PIPE)
-    out, err = p.communicate()
+
     if mute:
         return
     if err:
